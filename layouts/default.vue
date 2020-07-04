@@ -41,11 +41,11 @@
         <v-icon>mdi-menu</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-content>
+    <v-main>
       <v-container>
         <nuxt />
       </v-container>
-    </v-content>
+    </v-main>
     <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
       <v-list>
         <v-list-item @click.native="right = !right">
@@ -91,3 +91,9 @@ export default {
   },
 }
 </script>
+
+<style>
+.v-main__wrap {
+  background-color: #f8f8f8;
+}
+</style>
