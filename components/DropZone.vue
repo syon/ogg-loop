@@ -13,7 +13,7 @@ export default {
   methods: {
     onDrop(formData, files) {
       console.log({ formData, files })
-      this.$store.commit('dropper/SET_Files', Array.from(files))
+      this.$store.dispatch('dropper/load', Array.from(files))
     },
   },
 }

@@ -1,12 +1,14 @@
 <template>
-  <div>
-    <div class="controls">
+  <div class="LoopEditor">
+    <drop-zone />
+    <dropped-files />
+    <div class="controls my-2">
       <div class="buttons">
-        <button @click="load">load</button>
-        <button @click="play">play</button>
-        <button @click="playPause">playPause</button>
-        <button @click="pause">pause</button>
-        <button @click="regionPlayLoop">regionPlayLoop</button>
+        <v-btn @click="load">load</v-btn>
+        <v-btn @click="play">play</v-btn>
+        <v-btn @click="playPause">playPause</v-btn>
+        <v-btn @click="pause">pause</v-btn>
+        <v-btn @click="regionPlayLoop">regionPlayLoop</v-btn>
       </div>
 
       <!-- <div>{{ message }}</div> -->
@@ -56,17 +58,34 @@
     </div>
     <div id="waveform"></div>
     <div id="waveform-minimap"></div>
+    <hr />
+    <form
+      action="https://pyless.syon.vercel.app/api/write"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <input type="file" name="myfile" />
+      <input type="text" name="loopstart" value="1234" />
+      <input type="number" name="looplength" value="567890" />
+      <input type="submit" value="submit" />
+    </form>
   </div>
 </template>
 
 <script>
-/* eslint-disable no-console */
+import { mapGetters } from 'vuex'
 import WaveSurfer from 'wavesurfer.js'
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions'
 import CursorPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.cursor'
 import MinimapPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.minimap'
+import DropZone from '@/components/DropZone'
+import DroppedFiles from '@/components/DroppedFiles'
 
 export default {
+  components: {
+    DropZone,
+    DroppedFiles,
+  },
   data() {
     return {
       zoomVal: 0,
@@ -77,6 +96,9 @@ export default {
     }
   },
   computed: {
+    ...mapGetters({
+      droppedFiles: 'dropper/gFiles',
+    }),
     currentSample() {
       if (this.wavesurfer) {
         return this.calcSample(this.wavesurfer.getCurrentTime())
@@ -147,7 +169,8 @@ export default {
         this.message = 'ready'
       })
 
-      this.wavesurfer.load('/sample.ogg')
+      console.log('wavesurfer.load >>', this.droppedFiles[0])
+      this.wavesurfer.load(this.droppedFiles[0].data)
 
       this.changeVolume()
 
