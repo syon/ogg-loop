@@ -83,6 +83,7 @@
 
 <script>
 import { mapGetters } from 'vuex'
+import FileDownload from 'js-file-download'
 import WaveSurfer from 'wavesurfer.js'
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions'
 import CursorPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.cursor'
@@ -242,7 +243,8 @@ export default {
         },
       }
       const url = `${location.origin}/api/write`
-      await this.$axios.$post(url, formData, config)
+      const data = await this.$axios.$post(url, formData, config)
+      FileDownload(data, 'MyLoop.ogg')
     },
   },
 }
