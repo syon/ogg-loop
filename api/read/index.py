@@ -17,7 +17,10 @@ async def index(request, path=""):
         return response.json({
             'LOOPSTART': ogg.get('loopstart'),
             'LOOPLENGTH': ogg.get('looplength'),
-            'SOFTWARE': ogg.get('software'),
             'DATE': ogg.get('date'),
+            'TITLE': ogg.get('title'),
+            'ARTIST': ogg.get('artist'),
+            'ENCODER': ogg.get('encoder'),
+            'SOFTWARE': ogg.get('software'),
         }, headers=headers)
     return response.json({'msg': 'hello'}, headers=headers)

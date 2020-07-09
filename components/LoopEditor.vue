@@ -1,33 +1,38 @@
 <template>
   <v-card class="LoopEditor pa-8">
     <drop-zone />
-    <form
-      action="/api/write"
-      method="post"
-      enctype="multipart/form-data"
-      @submit.prevent="handleSubmit"
-    >
-      <v-file-input
-        v-model="myfile"
-        name="myfile"
-        accept="audio/ogg"
-        show-size
-        outlined
-        label="OGG File"
-      />
-      <!-- <input type="file" name="myfile" /> -->
-      <input type="text" name="loopstart" value="1234" />
-      <input type="number" name="looplength" value="567890" />
-      <input type="submit" value="submit" />
-    </form>
-    <v-btn color="primary" @click="handleScanOgg">handleScanOgg</v-btn>
+    <v-row>
+      <v-col cols="4">
+        <v-file-input
+          v-model="myfile"
+          name="myfile"
+          accept="audio/ogg"
+          show-size
+          outlined
+          label="OGG File"
+        />
+      </v-col>
+      <v-col cols="4">
+        <div>{{ meta }}</div>
+      </v-col>
+      <v-col cols="2">
+        <v-btn @click="handleScanOgg">ループ情報を読み取る</v-btn>
+      </v-col>
+      <v-col cols="2" class="text-right">
+        <form
+          action="/api/write"
+          method="post"
+          enctype="multipart/form-data"
+          @submit.prevent="handleSubmit"
+        >
+          <v-btn type="submit" color="primary">ダウンロード</v-btn>
+        </form>
+      </v-col>
+    </v-row>
     <div class="controls my-2">
       <div class="buttons">
-        <v-btn @click="load">load</v-btn>
-        <v-btn @click="play">play</v-btn>
-        <v-btn @click="playPause">playPause</v-btn>
-        <v-btn @click="pause">pause</v-btn>
-        <v-btn @click="regionPlayLoop">regionPlayLoop</v-btn>
+        <v-btn @click="playPause">再生・一時停止</v-btn>
+        <v-btn @click="regionPlayLoop">ループ再生</v-btn>
       </div>
 
       <!-- <div>{{ message }}</div> -->
@@ -89,6 +94,7 @@ import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions'
 import CursorPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.cursor'
 import MinimapPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.minimap'
 import DropZone from '@/components/DropZone'
+import Ogg from '@/lib/Ogg'
 
 export default {
   components: {
@@ -101,7 +107,8 @@ export default {
       volumeVal: 20,
       message: '',
       wavesurfer: null,
-      region: null,
+      region: {},
+      meta: {},
     }
   },
   computed: {
@@ -140,11 +147,14 @@ export default {
   },
   watch: {
     gFileBuffer() {
-      this.myfile = this.gFile
-      this.load(this.gFileBuffer)
+      this.refresh()
     },
   },
   methods: {
+    refresh() {
+      this.myfile = this.gFile
+      this.load(this.gFileBuffer)
+    },
     load(fileBuffer) {
       this.wavesurfer = WaveSurfer.create({
         container: '#waveform',
@@ -222,21 +232,19 @@ export default {
       return Math.round(sec * 44100)
     },
     async handleScanOgg() {
-      const formData = new FormData()
-      formData.append('myfile', this.myfile)
-      const config = {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
+      this.meta = await Ogg.scan(this.myfile)
+      if (this.meta.LOOPSTART) {
+        this.region.start = this.meta.LOOPSTART / 44100
       }
-      const url = `${location.origin}/api/read`
-      await this.$axios.$post(url, formData, config)
+      if (this.meta.LOOPLENGTH) {
+        this.region.end = (this.meta.LOOPSTART + this.meta.LOOPLENGTH) / 44100
+      }
     },
     async handleSubmit() {
       const formData = new FormData()
       formData.append('myfile', this.myfile)
-      formData.append('loopstart', 1234)
-      formData.append('looplength', 567890)
+      formData.append('loopstart', this.sampleStart)
+      formData.append('looplength', this.sampleEnd - this.sampleStart)
       const config = {
         headers: {
           'content-type': 'multipart/form-data',
@@ -255,17 +263,17 @@ body {
   background: #f8f8f8;
 }
 .container {
-  width: 90%;
-  max-width: 1200px;
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
   margin: auto;
-  /* padding: 50px; */
+  padding-left: 16px;
+  padding-right: 16px;
   background: #fff;
 }
 .LoopEditor {
+  width: 100%;
   margin-top: -64px;
-  width: 90%;
-  max-width: 1200px;
 }
 .controls {
   margin-bottom: 1em;
