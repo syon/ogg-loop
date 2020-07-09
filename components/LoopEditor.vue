@@ -1,7 +1,26 @@
 <template>
-  <div class="LoopEditor">
+  <v-card class="LoopEditor pa-8">
     <drop-zone />
-    <dropped-files />
+    <form
+      action="/api/write"
+      method="post"
+      enctype="multipart/form-data"
+      @submit.prevent="handleSubmit"
+    >
+      <v-file-input
+        v-model="myfile"
+        name="myfile"
+        accept="audio/ogg"
+        show-size
+        outlined
+        label="OGG File"
+      />
+      <!-- <input type="file" name="myfile" /> -->
+      <input type="text" name="loopstart" value="1234" />
+      <input type="number" name="looplength" value="567890" />
+      <input type="submit" value="submit" />
+    </form>
+    <v-btn color="primary" @click="handleScanOgg">handleScanOgg</v-btn>
     <div class="controls my-2">
       <div class="buttons">
         <v-btn @click="load">load</v-btn>
@@ -59,17 +78,7 @@
     <div id="waveform"></div>
     <div id="waveform-minimap"></div>
     <hr />
-    <form
-      action="https://pyless.syon.vercel.app/api/write"
-      method="post"
-      enctype="multipart/form-data"
-    >
-      <input type="file" name="myfile" />
-      <input type="text" name="loopstart" value="1234" />
-      <input type="number" name="looplength" value="567890" />
-      <input type="submit" value="submit" />
-    </form>
-  </div>
+  </v-card>
 </template>
 
 <script>
@@ -79,15 +88,14 @@ import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions'
 import CursorPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.cursor'
 import MinimapPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.minimap'
 import DropZone from '@/components/DropZone'
-import DroppedFiles from '@/components/DroppedFiles'
 
 export default {
   components: {
     DropZone,
-    DroppedFiles,
   },
   data() {
     return {
+      myfile: null,
       zoomVal: 0,
       volumeVal: 20,
       message: '',
@@ -97,7 +105,9 @@ export default {
   },
   computed: {
     ...mapGetters({
-      droppedFiles: 'dropper/gFiles',
+      gFile: 'dropper/gFile',
+      gFileInfo: 'dropper/gFileInfo',
+      gFileBuffer: 'dropper/gFileBuffer',
     }),
     currentSample() {
       if (this.wavesurfer) {
@@ -127,8 +137,14 @@ export default {
       return ''
     },
   },
+  watch: {
+    gFileBuffer() {
+      this.myfile = this.gFile
+      this.load(this.gFileBuffer)
+    },
+  },
   methods: {
-    load() {
+    load(fileBuffer) {
       this.wavesurfer = WaveSurfer.create({
         container: '#waveform',
         waveColor: 'violet',
@@ -169,8 +185,7 @@ export default {
         this.message = 'ready'
       })
 
-      console.log('wavesurfer.load >>', this.droppedFiles[0])
-      this.wavesurfer.load(this.droppedFiles[0].data)
+      this.wavesurfer.load(fileBuffer)
 
       this.changeVolume()
 
@@ -205,6 +220,30 @@ export default {
     calcSample(sec) {
       return Math.round(sec * 44100)
     },
+    async handleScanOgg() {
+      const formData = new FormData()
+      formData.append('myfile', this.myfile)
+      const config = {
+        headers: {
+          'content-type': 'multipart/form-data',
+        },
+      }
+      const url = `${location.origin}/api/read`
+      await this.$axios.$post(url, formData, config)
+    },
+    async handleSubmit() {
+      const formData = new FormData()
+      formData.append('myfile', this.myfile)
+      formData.append('loopstart', 1234)
+      formData.append('looplength', 567890)
+      const config = {
+        headers: {
+          'content-type': 'multipart/form-data',
+        },
+      }
+      const url = `${location.origin}/api/write`
+      await this.$axios.$post(url, formData, config)
+    },
   },
 }
 </script>
@@ -214,11 +253,17 @@ body {
   background: #f8f8f8;
 }
 .container {
-  width: 1000px;
+  width: 90%;
+  max-width: 1200px;
   min-height: 100vh;
   margin: auto;
-  padding: 50px;
+  /* padding: 50px; */
   background: #fff;
+}
+.LoopEditor {
+  margin-top: -64px;
+  width: 90%;
+  max-width: 1200px;
 }
 .controls {
   margin-bottom: 1em;
