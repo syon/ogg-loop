@@ -210,18 +210,12 @@ export default {
       }
     },
     async handleSubmit() {
-      const formData = new FormData()
-      formData.append('myfile', this.myfile)
-      formData.append('loopstart', this.sampleStart)
-      formData.append('looplength', this.sampleEnd - this.sampleStart)
-      const config = {
-        headers: {
-          'content-type': 'multipart/form-data',
-        },
-      }
-      const url = `${location.origin}/api/write`
-      const data = await this.$axios.$post(url, formData, config)
-      FileDownload(data, 'MyLoop.ogg')
+      const myfile = this.myfile
+      const loopstart = this.sampleStart
+      const looplength = this.sampleEnd - this.sampleStart
+      const data = await Ogg.write({ myfile, loopstart, looplength })
+      const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
+      FileDownload(data, filename)
     },
   },
 }
