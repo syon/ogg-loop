@@ -1,8 +1,8 @@
 <template>
   <v-card class="LoopEditor pa-8">
     <drop-zone />
-    <v-row>
-      <v-col cols="4">
+    <div class="d-flex align-center justify-space-between">
+      <div class="d-flex align-center">
         <v-file-input
           v-model="myfile"
           name="myfile"
@@ -10,25 +10,23 @@
           show-size
           outlined
           label="OGG File"
+          hide-details
+          style="width: 400px;"
         />
-      </v-col>
-      <v-col cols="4">
-        <div>{{ meta }}</div>
-      </v-col>
-      <v-col cols="2">
-        <v-btn @click="handleScanOgg">ループ情報を読み取る</v-btn>
-      </v-col>
-      <v-col cols="2" class="text-right">
-        <form
-          action="/api/write"
-          method="post"
-          enctype="multipart/form-data"
-          @submit.prevent="handleSubmit"
+        <v-btn class="ml-4" depressed @click="handleScanOgg"
+          >ループ情報を読み取る</v-btn
         >
-          <v-btn type="submit" color="primary">ダウンロード</v-btn>
-        </form>
-      </v-col>
-    </v-row>
+      </div>
+      <form
+        action="/api/write"
+        method="post"
+        enctype="multipart/form-data"
+        @submit.prevent="handleSubmit"
+      >
+        <v-btn type="submit" color="primary">ダウンロード</v-btn>
+      </form>
+    </div>
+    <v-divider class="my-8" />
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
         <div class="buttons">
@@ -59,6 +57,7 @@
           <v-slider
             v-model="volumeVal"
             prepend-icon="mdi-volume-high"
+            hide-details
             @change="changeVolume"
           />
         </div>
@@ -115,6 +114,7 @@ export default {
   data() {
     return {
       myfile: null,
+      audioprocess: 0,
       zoomVal: 0,
       volumeVal: 20,
       speedVal: '1.0',
@@ -132,17 +132,10 @@ export default {
       gFileBuffer: 'dropper/gFileBuffer',
     }),
     currentSample() {
-      if (this.wavesurfer) {
-        return this.calcSample(this.wavesurfer.getCurrentTime())
-      }
-      return ''
+      return Math.round(this.audioprocess * 44100)
     },
     currentTime() {
-      if (this.wavesurfer) {
-        const crr = this.wavesurfer.getCurrentTime()
-        return Math.round(crr * 100) / 100
-      }
-      return ''
+      return Math.round(this.audioprocess * 100) / 100
     },
     sampleStart() {
       if (this.region) {
@@ -185,8 +178,13 @@ export default {
       const [, region] = Object.entries(list)[0]
       this.region = region
 
-      this.wavesurfer.on('ready', () => {
-        this.message = 'ready'
+      this.wavesurfer.on('audioprocess', (sec) => {
+        this.audioprocess = sec
+      })
+
+      this.wavesurfer.on('interaction', (a, b) => {
+        console.log('interaction', a, b)
+        // this.audioprocess = sec
       })
 
       this.wavesurfer.load(fileBuffer)
@@ -286,8 +284,5 @@ region.wavesurfer-region {
 }
 .loopInfo .big {
   font-size: 1.5rem;
-}
-.xx-volume .v-messages {
-  display: none;
 }
 </style>
