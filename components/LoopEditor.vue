@@ -159,7 +159,11 @@ export default {
       if (this.wavesurfer) {
         this.wavesurfer.destroy()
       }
-      this.wavesurfer = Surf.create()
+      const options = {
+        loopstart: this.meta.LOOPSTART,
+        looplength: this.meta.LOOPLENGTH,
+      }
+      this.wavesurfer = Surf.create(options)
       const list = this.wavesurfer.regions.list
       const [, region] = Object.entries(list)[0]
       this.region = region
@@ -205,13 +209,12 @@ export default {
     },
     async handleScanOgg() {
       this.loading = true
-      this.meta = await Ogg.scan(this.myfile)
-      if (this.meta.LOOPSTART) {
-        this.region.start = this.meta.LOOPSTART / 44100
+      try {
+        this.meta = await Ogg.scan(this.myfile)
+      } catch (e) {
+        alert('Scan Error.')
       }
-      if (this.meta.LOOPLENGTH) {
-        this.region.end = (this.meta.LOOPSTART + this.meta.LOOPLENGTH) / 44100
-      }
+      this.refresh()
       this.loading = false
     },
     async handleSubmit() {
