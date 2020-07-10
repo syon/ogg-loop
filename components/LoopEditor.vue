@@ -30,7 +30,12 @@
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
         <div class="buttons">
-          <v-btn class="mr-4" @click="playPause">
+          <v-btn
+            v-shortkey="['space']"
+            class="mr-4"
+            @shortkey="playPause"
+            @click="playPause"
+          >
             <template v-if="!isPlaying">
               <v-icon v-text="'mdi-play'" />
             </template>
