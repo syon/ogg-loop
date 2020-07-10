@@ -82,7 +82,9 @@
     </div>
     <div id="waveform"></div>
     <div id="waveform-minimap"></div>
-    <hr />
+    <v-overlay :value="loading">
+      <v-progress-circular indeterminate size="64"></v-progress-circular>
+    </v-overlay>
   </v-card>
 </template>
 
@@ -106,6 +108,7 @@ export default {
       wavesurfer: null,
       region: {},
       meta: {},
+      loading: false,
     }
   },
   computed: {
@@ -201,6 +204,7 @@ export default {
       return Math.round(sec * 44100)
     },
     async handleScanOgg() {
+      this.loading = true
       this.meta = await Ogg.scan(this.myfile)
       if (this.meta.LOOPSTART) {
         this.region.start = this.meta.LOOPSTART / 44100
@@ -208,13 +212,16 @@ export default {
       if (this.meta.LOOPLENGTH) {
         this.region.end = (this.meta.LOOPSTART + this.meta.LOOPLENGTH) / 44100
       }
+      this.loading = false
     },
     async handleSubmit() {
+      this.loading = true
       const myfile = this.myfile
       const loopstart = this.sampleStart
       const looplength = this.sampleEnd - this.sampleStart
       const data = await Ogg.write({ myfile, loopstart, looplength })
       const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
+      this.loading = false
       FileDownload(data, filename)
     },
   },
