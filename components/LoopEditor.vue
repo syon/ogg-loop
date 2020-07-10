@@ -299,6 +299,10 @@ body {
 }
 region.wavesurfer-region {
   height: 80% !important;
+  /* z-index: 0 !important; */
+}
+region .wavesurfer-handle {
+  background-color: #f57f17 !important;
 }
 .loopInfo {
   display: flex;
