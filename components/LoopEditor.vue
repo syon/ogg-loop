@@ -30,65 +30,49 @@
       </v-col>
     </v-row>
     <div class="controls my-2">
-      <div class="buttons">
-        <v-btn @click="playPause">
-          <template v-if="!isPlaying">
-            <v-icon v-text="'mdi-play'" />
-          </template>
-          <template v-else>
-            <v-icon v-text="'mdi-pause'" />
-          </template>
-        </v-btn>
-        <v-btn @click="regionPlayLoop">
-          <v-icon left>mdi-twitter-retweet</v-icon>ループ再生
-        </v-btn>
-      </div>
-
-      <div>
-        <v-btn @click="resetZoom()">Reset Zoom</v-btn>
-      </div>
-      <div></div>
-      <v-row>
-        <v-col>
-          <v-slider
-            v-model="zoomVal"
-            class="align-center"
-            :max="1000"
-            :min="0"
-            hide-details
-            @change="changeZoom"
-          >
-            <template v-slot:append>
-              <v-text-field
-                v-model="zoomVal"
-                class="mt-0 pt-0"
-                hide-details
-                single-line
-                type="number"
-                style="width: 60px;"
-              ></v-text-field>
+      <div class="d-flex justify-space-between">
+        <div class="buttons">
+          <v-btn class="mr-4" @click="playPause">
+            <template v-if="!isPlaying">
+              <v-icon v-text="'mdi-play'" />
             </template>
-          </v-slider>
-        </v-col>
-        <v-col cols="2">
-          <div>Volume:</div>
+            <template v-else>
+              <v-icon v-text="'mdi-pause'" />
+            </template>
+          </v-btn>
+          <v-btn @click="regionPlayLoop">
+            <v-icon left>mdi-twitter-retweet</v-icon>ループ再生
+          </v-btn>
+        </div>
+        <div>
+          <v-icon left>mdi-magnify-plus-outline</v-icon>
+          <v-btn-toggle v-model="zoomVal" @change="changeZoom">
+            <v-btn :value="0">0</v-btn>
+            <v-btn :value="100">10</v-btn>
+            <v-btn :value="200">20</v-btn>
+            <v-btn :value="500">50</v-btn>
+            <v-btn :value="1000">100</v-btn>
+            <v-btn :value="10000">1000</v-btn>
+          </v-btn-toggle>
+        </div>
+        <div class="xx-volume d-flex align-center" style="width: 200px;">
           <v-slider
             v-model="volumeVal"
             prepend-icon="mdi-volume-high"
             @change="changeVolume"
           />
-        </v-col>
-        <v-col>
-          <div>Speed:</div>
-          <v-btn-toggle v-model="speedVal" @change="changeSpeed">
+        </div>
+        <div>
+          <v-icon left>mdi-fast-forward</v-icon>
+          <v-btn-toggle v-model="speedVal" mandatory @change="changeSpeed">
             <v-btn value="0.2">0.2</v-btn>
             <v-btn value="0.5">0.5</v-btn>
             <v-btn value="1.0">1.0</v-btn>
             <v-btn value="1.5">1.5</v-btn>
             <v-btn value="2.0">2.0</v-btn>
           </v-btn-toggle>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
       <div class="loopInfo">
         <div>
           <div>現在地</div>
@@ -302,5 +286,8 @@ region.wavesurfer-region {
 }
 .loopInfo .big {
   font-size: 1.5rem;
+}
+.xx-volume .v-messages {
+  display: none;
 }
 </style>
