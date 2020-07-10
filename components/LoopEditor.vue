@@ -31,35 +31,64 @@
     </v-row>
     <div class="controls my-2">
       <div class="buttons">
-        <v-btn @click="playPause">再生・一時停止</v-btn>
-        <v-btn @click="regionPlayLoop">ループ再生</v-btn>
+        <v-btn @click="playPause">
+          <template v-if="!isPlaying">
+            <v-icon v-text="'mdi-play'" />
+          </template>
+          <template v-else>
+            <v-icon v-text="'mdi-pause'" />
+          </template>
+        </v-btn>
+        <v-btn @click="regionPlayLoop">
+          <v-icon left>mdi-twitter-retweet</v-icon>ループ再生
+        </v-btn>
       </div>
 
-      <!-- <div>{{ message }}</div> -->
       <div>
-        <input
-          v-model="zoomVal"
-          type="range"
-          min="0"
-          max="10000"
-          style="width: 700px;"
-          @change="handleChangeZoom"
-        />
-        <span>{{ zoomVal }}</span>
-        <button @click="changeZoom(0)">Reset Zoom</button>
+        <v-btn @click="resetZoom()">Reset Zoom</v-btn>
       </div>
-      <div>
-        Volume:
-        <input
-          v-model="volumeVal"
-          type="range"
-          min="0"
-          max="100"
-          style="width: 500px;"
-          @change="changeVolume"
-        />
-        <span>{{ volumeVal }}</span>
-      </div>
+      <div></div>
+      <v-row>
+        <v-col>
+          <v-slider
+            v-model="zoomVal"
+            class="align-center"
+            :max="1000"
+            :min="0"
+            hide-details
+            @change="changeZoom"
+          >
+            <template v-slot:append>
+              <v-text-field
+                v-model="zoomVal"
+                class="mt-0 pt-0"
+                hide-details
+                single-line
+                type="number"
+                style="width: 60px;"
+              ></v-text-field>
+            </template>
+          </v-slider>
+        </v-col>
+        <v-col cols="2">
+          <div>Volume:</div>
+          <v-slider
+            v-model="volumeVal"
+            prepend-icon="mdi-volume-high"
+            @change="changeVolume"
+          />
+        </v-col>
+        <v-col>
+          <div>Speed:</div>
+          <v-btn-toggle v-model="speedVal" @change="changeSpeed">
+            <v-btn value="0.2">0.2</v-btn>
+            <v-btn value="0.5">0.5</v-btn>
+            <v-btn value="1.0">1.0</v-btn>
+            <v-btn value="1.5">1.5</v-btn>
+            <v-btn value="2.0">2.0</v-btn>
+          </v-btn-toggle>
+        </v-col>
+      </v-row>
       <div class="loopInfo">
         <div>
           <div>現在地</div>
@@ -104,7 +133,7 @@ export default {
       myfile: null,
       zoomVal: 0,
       volumeVal: 20,
-      message: '',
+      speedVal: '1.0',
       wavesurfer: null,
       region: {},
       meta: {},
@@ -114,6 +143,7 @@ export default {
   computed: {
     ...mapGetters({
       gFile: 'dropper/gFile',
+      gLastLoaded: 'dropper/gLastLoaded',
       gFileInfo: 'dropper/gFileInfo',
       gFileBuffer: 'dropper/gFileBuffer',
     }),
@@ -144,9 +174,12 @@ export default {
       }
       return ''
     },
+    isPlaying() {
+      return this.wavesurfer && this.wavesurfer.isPlaying()
+    },
   },
   watch: {
-    gFileBuffer() {
+    gLastLoaded() {
       this.refresh()
     },
   },
@@ -191,15 +224,18 @@ export default {
     pause() {
       this.wavesurfer.pause()
     },
-    handleChangeZoom(ev) {
-      this.changeZoom(ev.target.value)
+    resetZoom() {
+      this.zoomVal = 0
+      this.wavesurfer.zoom(0)
     },
-    changeZoom(val) {
-      this.zoomVal = val
-      this.wavesurfer.zoom(Number(val))
+    changeZoom() {
+      this.wavesurfer.zoom(Number(this.zoomVal))
     },
     changeVolume() {
       this.wavesurfer.setVolume(Number(this.volumeVal / 100))
+    },
+    changeSpeed() {
+      this.wavesurfer.setPlaybackRate(Number(this.speedVal))
     },
     regionPlayLoop() {
       this.region.playLoop()

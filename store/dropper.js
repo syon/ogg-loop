@@ -5,11 +5,15 @@ const dg = debug('@:store/dropper')
 export const state = () => ({
   file: null,
   buffer: null,
+  lastLoaded: null,
 })
 
 export const getters = {
   gFile(state) {
     return state.file
+  },
+  gLastLoaded(state) {
+    return state.lastLoaded
   },
   gFileBuffer(state) {
     return state.buffer
@@ -26,6 +30,7 @@ export const mutations = {
   },
   SET_Buffer(state, buffer) {
     state.buffer = buffer
+    state.lastLoaded = new Date().getTime()
   },
 }
 
