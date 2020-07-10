@@ -1,3 +1,7 @@
+import debug from 'debug'
+
+const dg = debug('@:store/dropper')
+
 export const state = () => ({
   file: null,
   buffer: null,
@@ -48,11 +52,11 @@ function fetchFiles(event) {
 
 function readAsArrayBuffer(file) {
   return new Promise((resolve, reject) => {
-    console.log('[#readAsArrayBuffer] start')
+    dg('[#readAsArrayBuffer] start')
     const reader = new FileReader()
     reader.readAsDataURL(file)
     reader.onload = () => {
-      console.log('[#readAsArrayBuffer] end')
+      dg('[#readAsArrayBuffer] end')
       resolve(reader.result)
     }
   })

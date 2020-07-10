@@ -157,9 +157,6 @@ export default {
         this.wavesurfer.destroy()
       }
       this.wavesurfer = Surf.create()
-      console.log('-------------------')
-      console.log(this.wavesurfer)
-      console.log('-------------------')
       const list = this.wavesurfer.regions.list
       const [, region] = Object.entries(list)[0]
       this.region = region
