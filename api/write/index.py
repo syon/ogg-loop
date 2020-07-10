@@ -1,27 +1,28 @@
-from sanic import Sanic, response
+from flask import Flask, request, send_file
 from mutagen.oggvorbis import OggVorbis
 import tempfile
 
-app = Sanic()
+app = Flask(__name__)
 
 
 @app.route('/', methods=['POST'])
 @app.route('/<path:path>', methods=['POST'])
-async def index(request, path=""):
+def index(path=""):
     if request.method == 'POST':
         loopstart_val = request.form['loopstart']
         looplength_val = request.form['looplength']
         print('LOOPSTART:', loopstart_val)
         print('LOOPLENGTH:', looplength_val)
-        print('++++++++++++++++++++++++')
-        myfile = request.files.get('myfile')
+        myfile = request.files['myfile']
         tmp = tempfile.NamedTemporaryFile()
-        f = open(tmp.name, "wb")
-        f.write(myfile.body)
+        print(tmp.name)
+        with open(tmp.name, "wb") as f:
+            f.write(myfile.read())
+            f.close()
         ogg = OggVorbis(tmp.name)
         ogg['LOOPSTART'] = loopstart_val
         ogg['LOOPLENGTH'] = looplength_val
         ogg.save()
         print(ogg)
-        filename = 'your.ogg'
-        return await response.file(f.name, mime_type='audio/ogg', filename=filename)
+        filename = 'loop.ogg'
+        return send_file(tmp.name, mimetype='audio/ogg', as_attachment=True, attachment_filename=filename)
