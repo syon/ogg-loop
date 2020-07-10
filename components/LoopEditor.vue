@@ -74,21 +74,24 @@
       </div>
       <div class="loopInfo">
         <div>
-          <div>現在地</div>
-          <div class="big">{{ currentSample }}</div>
-          <div class="big">{{ currentTime }}秒</div>
+          <div>現在</div>
+          <div class="big">{{ currentTime }}</div>
+          <div class="text-subtitle-1">{{ currentSample }}</div>
         </div>
         <div>
           <div>ループ開始</div>
-          <div class="big">{{ sampleStart }}</div>
+          <div class="big">{{ sampleStartTime }}</div>
+          <div class="text-subtitle-1">{{ sampleStart }}</div>
         </div>
         <div>
           <div>ループ終了</div>
-          <div class="big">{{ sampleEnd }}</div>
+          <div class="big">{{ sampleEndTime }}</div>
+          <div class="text-subtitle-1">{{ sampleEnd }}</div>
         </div>
         <div>
           <div>ループ長</div>
-          <div class="big">{{ sampleEnd - sampleStart }}</div>
+          <div class="big">{{ looplengthTime }}</div>
+          <div class="text-subtitle-1">{{ looplengthSample }}</div>
         </div>
       </div>
     </div>
@@ -135,12 +138,18 @@ export default {
       return Math.round(this.audioprocess * 44100)
     },
     currentTime() {
-      return Math.round(this.audioprocess * 100) / 100
+      return this.formatTime(this.audioprocess)
     },
     sampleStart() {
       if (this.region) {
         const crr = this.region.start
         return Math.round(crr * 44100)
+      }
+      return ''
+    },
+    sampleStartTime() {
+      if (this.region) {
+        return this.formatTime(this.region.start)
       }
       return ''
     },
@@ -150,6 +159,18 @@ export default {
         return Math.round(crr * 44100)
       }
       return ''
+    },
+    sampleEndTime() {
+      if (this.region) {
+        return this.formatTime(this.region.end)
+      }
+      return ''
+    },
+    looplengthSample() {
+      return this.sampleEnd - this.sampleStart
+    },
+    looplengthTime() {
+      return this.formatTime(this.looplengthSample / 44100)
     },
     isPlaying() {
       return this.wavesurfer && this.wavesurfer.isPlaying()
@@ -182,9 +203,8 @@ export default {
         this.audioprocess = sec
       })
 
-      this.wavesurfer.on('interaction', (a, b) => {
-        console.log('interaction', a, b)
-        // this.audioprocess = sec
+      this.wavesurfer.on('seek', (a, b) => {
+        this.audioprocess = this.wavesurfer.getCurrentTime()
       })
 
       this.wavesurfer.load(fileBuffer)
@@ -195,6 +215,11 @@ export default {
       //   region.loop = false
       //   // this.wavesurfer.clearRegions()
       // })
+    },
+    formatTime(v) {
+      let sec = v
+      if (!v) sec = 0
+      return new Date(sec * 1000).toISOString().slice(14, -1)
     },
     play() {
       // this.wavesurfer.play(this.wavesurfer.getCurrentTime())
