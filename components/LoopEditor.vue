@@ -100,8 +100,10 @@
         </div>
       </div>
     </div>
-    <div id="waveform"></div>
-    <div id="waveform-minimap"></div>
+    <div style="position: relative;">
+      <div id="waveform"></div>
+      <div id="waveform-minimap"></div>
+    </div>
     <v-overlay :value="loading">
       <v-progress-circular indeterminate size="64"></v-progress-circular>
     </v-overlay>
