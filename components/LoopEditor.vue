@@ -35,9 +35,32 @@
         action="/api/write"
         method="post"
         enctype="multipart/form-data"
+        class="d-flex align-center"
         @submit.prevent="handleSubmit"
       >
-        <v-btn type="submit" color="primary">ダウンロード</v-btn>
+        <v-text-field
+          v-model="formLoopStartSample"
+          type="number"
+          label="LOOPSTART"
+          outlined
+          hide-details
+          dense
+          class="mr-4"
+          style="width: 140px;"
+          @change="syncFormToRegion"
+        />
+        <v-text-field
+          v-model="formLoopLengthSample"
+          type="number"
+          label="LOOPLENGTH"
+          outlined
+          hide-details
+          dense
+          class="mr-4"
+          style="width: 140px;"
+          @change="syncFormToRegion"
+        />
+        <v-btn type="submit" color="primary">Download</v-btn>
       </form>
     </div>
     <v-divider class="my-6" />
@@ -131,7 +154,7 @@
       </div>
     </div>
     <div class="d-flex align-center justify-space-between">
-      <div class="loopInfo my-4">
+      <div class="loopInfo d-flex my-4">
         <v-card flat>
           <v-card-subtitle class="pb-2">Current</v-card-subtitle>
           <v-card-text>
@@ -170,7 +193,6 @@
         </v-card>
       </div>
       <div class="loop-controls">
-        <v-btn @click="handleRegionEdge">aaa</v-btn>
         <v-btn-toggle>
           <v-btn
             v-shortkey="['n']"
@@ -225,6 +247,8 @@ export default {
       metaReady: false,
       loading: false,
       loop: true,
+      formLoopStartSample: null,
+      formLoopLengthSample: null,
     }
   },
   computed: {
@@ -314,7 +338,7 @@ export default {
         this.audioprocess = sec
       })
 
-      this.wavesurfer.on('seek', (a, b) => {
+      this.wavesurfer.on('seek', () => {
         const sec = this.wavesurfer.getCurrentTime()
         this.audioprocess = sec
         if (sec < region.start || region.end < sec) {
@@ -336,6 +360,12 @@ export default {
       this.wavesurfer.on('region-out', (region) => {
         region.loop = false
       })
+      this.wavesurfer.on('ready', () => {
+        this.syncRegionToForm()
+      })
+      this.wavesurfer.on('region-updated', (region) => {
+        this.syncRegionToForm()
+      })
     },
     formatTime(v) {
       let sec = v
@@ -354,9 +384,6 @@ export default {
     },
     handleSkip(offset) {
       this.wavesurfer.skip(offset)
-    },
-    handleRegionEdge() {
-      this.region.update({ start: 30 })
     },
     handleRepeat(offset) {
       const sec = this.region.end - offset
@@ -393,6 +420,19 @@ export default {
     handleChangeLoop() {
       this.region.loop = false
     },
+    syncRegionToForm() {
+      this.formLoopStartSample = Math.round(this.region.start * 44100)
+      this.formLoopLengthSample = Math.round(
+        (this.region.end - this.region.start) * 44100
+      )
+    },
+    syncFormToRegion() {
+      const start = Number(this.formLoopStartSample) / 44100
+      const end =
+        (Number(this.formLoopStartSample) + Number(this.formLoopLengthSample)) /
+        44100
+      this.region.update({ start, end })
+    },
     async handleScanOgg() {
       this.loading = true
       try {
@@ -408,8 +448,8 @@ export default {
       this.loading = true
       try {
         const myfile = this.myfile
-        const loopstart = this.sampleStart
-        const looplength = this.sampleEnd - this.sampleStart
+        const loopstart = this.formLoopStartSample
+        const looplength = this.formLoopLengthSample
         const data = await Ogg.write({ myfile, loopstart, looplength })
         const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
         FileDownload(data, filename)
@@ -451,10 +491,6 @@ region.wavesurfer-region {
 region .wavesurfer-handle {
   background-color: #f57f17 !important;
   width: 2px !important;
-}
-.loopInfo {
-  display: flex;
-  margin-top: 1em;
 }
 .loopInfo > div {
   min-width: 150px;
