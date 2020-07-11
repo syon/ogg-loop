@@ -131,29 +131,46 @@
       </div>
     </div>
     <div class="d-flex align-center justify-space-between">
-      <div class="loopInfo my-6">
-        <div>
-          <div>現在</div>
-          <div class="big">{{ currentTime }}</div>
-          <div class="text-subtitle-1">{{ currentSample }}</div>
-        </div>
-        <div>
-          <div>ループ開始</div>
-          <div class="big">{{ sampleStartTime }}</div>
-          <div class="text-subtitle-1">{{ sampleStart }}</div>
-        </div>
-        <div>
-          <div>ループ長</div>
-          <div class="big">{{ looplengthTime }}</div>
-          <div class="text-subtitle-1">{{ looplengthSample }}</div>
-        </div>
-        <div>
-          <div>ループ終了</div>
-          <div class="big">{{ sampleEndTime }}</div>
-          <div class="text-subtitle-1">{{ sampleEnd }}</div>
-        </div>
+      <div class="loopInfo my-4">
+        <v-card flat>
+          <v-card-subtitle class="pb-2">Current</v-card-subtitle>
+          <v-card-text>
+            <div class="big grey--text text--darken-3">
+              {{ currentTime }}
+            </div>
+            <div class="pt-1 text-subtitle-1">{{ currentSample }}</div>
+          </v-card-text>
+        </v-card>
+        <v-card flat>
+          <v-card-subtitle class="pb-2">Loop start</v-card-subtitle>
+          <v-card-text>
+            <div class="big grey--text text--darken-3">
+              {{ sampleStartTime }}
+            </div>
+            <div class="pt-1 text-subtitle-1">{{ sampleStart }}</div>
+          </v-card-text>
+        </v-card>
+        <v-card flat>
+          <v-card-subtitle class="pb-2">Loop length</v-card-subtitle>
+          <v-card-text>
+            <div class="big grey--text text--darken-3">
+              {{ looplengthTime }}
+            </div>
+            <div class="pt-1 text-subtitle-1">{{ looplengthSample }}</div>
+          </v-card-text>
+        </v-card>
+        <v-card flat>
+          <v-card-subtitle class="pb-2">Loop end</v-card-subtitle>
+          <v-card-text>
+            <div class="big grey--text text--darken-3">
+              {{ sampleEndTime }}
+            </div>
+            <div class="pt-1 text-subtitle-1">{{ sampleEnd }}</div>
+          </v-card-text>
+        </v-card>
       </div>
       <div class="loop-controls">
+        <v-btn @click="handleRegionEdge">aaa</v-btn>
         <v-btn-toggle>
           <v-btn
             v-shortkey="['n']"
@@ -337,6 +354,9 @@ export default {
     },
     handleSkip(offset) {
       this.wavesurfer.skip(offset)
+    },
+    handleRegionEdge() {
+      this.region.update({ start: 30 })
     },
     handleRepeat(offset) {
       const sec = this.region.end - offset
