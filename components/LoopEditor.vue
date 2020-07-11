@@ -269,13 +269,17 @@ export default {
     },
     async handleSubmit() {
       this.loading = true
-      const myfile = this.myfile
-      const loopstart = this.sampleStart
-      const looplength = this.sampleEnd - this.sampleStart
-      const data = await Ogg.write({ myfile, loopstart, looplength })
-      const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
+      try {
+        const myfile = this.myfile
+        const loopstart = this.sampleStart
+        const looplength = this.sampleEnd - this.sampleStart
+        const data = await Ogg.write({ myfile, loopstart, looplength })
+        const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
+        FileDownload(data, filename)
+      } catch (e) {
+        alert('Write Error.')
+      }
       this.loading = false
-      FileDownload(data, filename)
     },
   },
 }
