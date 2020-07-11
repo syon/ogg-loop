@@ -24,14 +24,12 @@
                 メタデータ
               </v-btn>
             </template>
-            <v-list>
-              <v-list-item v-for="(v, k) in meta" :key="k">
-                <v-list-item-title>{{ k }}</v-list-item-title>
-                <v-list-item-subtitle class="text-right">
-                  {{ v }}
-                </v-list-item-subtitle>
-              </v-list-item>
-            </v-list>
+            <v-card>
+              <v-card-text v-for="(v, k) in meta" :key="k">
+                <div class="text-caption">{{ k }}</div>
+                <div class="text-body-1">{{ v }}</div>
+              </v-card-text>
+            </v-card>
           </v-menu>
         </template>
       </div>
@@ -69,20 +67,11 @@
           <v-icon left>mdi-magnify-plus-outline</v-icon>
           <v-btn-toggle v-model="zoomVal" @change="changeZoom">
             <v-btn :value="0">0</v-btn>
-            <v-btn :value="100">10</v-btn>
-            <v-btn :value="200">20</v-btn>
-            <v-btn :value="500">50</v-btn>
-            <v-btn :value="1000">100</v-btn>
-            <v-btn :value="10000">1000</v-btn>
+            <v-btn :value="50">10</v-btn>
+            <v-btn :value="100">20</v-btn>
+            <v-btn :value="500">100</v-btn>
+            <v-btn :value="5000">1000</v-btn>
           </v-btn-toggle>
-        </div>
-        <div class="xx-volume d-flex align-center" style="width: 200px;">
-          <v-slider
-            v-model="volumeVal"
-            prepend-icon="mdi-volume-high"
-            hide-details
-            @change="changeVolume"
-          />
         </div>
         <div>
           <v-icon left>mdi-fast-forward</v-icon>
@@ -93,6 +82,14 @@
             <v-btn value="1.5">1.5</v-btn>
             <v-btn value="2.0">2.0</v-btn>
           </v-btn-toggle>
+        </div>
+        <div class="xx-volume d-flex align-center" style="width: 120px;">
+          <v-slider
+            v-model="volumeVal"
+            prepend-icon="mdi-volume-high"
+            hide-details
+            @change="changeVolume"
+          />
         </div>
       </div>
       <div class="loopInfo">
