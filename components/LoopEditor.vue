@@ -27,7 +27,7 @@
             <v-card>
               <v-card-text v-for="(v, k) in meta" :key="k">
                 <div class="text-caption">{{ k }}</div>
-                <div class="text-body-1">{{ v }}</div>
+                <div class="text-body-1 grey--text text--darken-4">{{ v }}</div>
               </v-card-text>
             </v-card>
           </v-menu>
