@@ -23,7 +23,7 @@
   background: rgba(255, 255, 255, 0.2);
 }
 .theme--dark.v-app-bar.v-toolbar.v-sheet {
-  background-color: transparent;
+  background-color: transparent !important;
 }
 .v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
   padding-top: 6px;
