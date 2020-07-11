@@ -40,7 +40,7 @@
         <v-btn type="submit" color="primary">ダウンロード</v-btn>
       </form>
     </div>
-    <v-divider class="my-8" />
+    <v-divider class="my-6" />
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
         <div class="d-flex align-center">
@@ -130,7 +130,7 @@
         </div>
       </div>
     </div>
-    <div class="loopInfo my-4">
+    <div class="loopInfo my-6">
       <div>
         <div>現在</div>
         <div class="big">{{ currentTime }}</div>
@@ -142,14 +142,14 @@
         <div class="text-subtitle-1">{{ sampleStart }}</div>
       </div>
       <div>
-        <div>ループ終了</div>
-        <div class="big">{{ sampleEndTime }}</div>
-        <div class="text-subtitle-1">{{ sampleEnd }}</div>
-      </div>
-      <div>
         <div>ループ長</div>
         <div class="big">{{ looplengthTime }}</div>
         <div class="text-subtitle-1">{{ looplengthSample }}</div>
+      </div>
+      <div>
+        <div>ループ終了</div>
+        <div class="big">{{ sampleEndTime }}</div>
+        <div class="text-subtitle-1">{{ sampleEnd }}</div>
       </div>
     </div>
     <div class="my-4" style="position: relative;">
@@ -178,7 +178,7 @@ export default {
       myfile: null,
       audioprocess: 0,
       zoomVal: 0,
-      volumeVal: 20,
+      volumeVal: 50,
       speedVal: '1.0',
       wavesurfer: null,
       region: {},
