@@ -67,11 +67,33 @@
         </div>
         <div>
           <v-btn-toggle>
-            <v-btn @click="handleSkip(-5)">
+            <v-btn
+              v-shortkey="['shift', 'arrowleft']"
+              @shortkey="handleSkip(-10)"
+              @click="handleSkip(-10)"
+            >
+              <v-icon>mdi-rewind-10</v-icon>
+            </v-btn>
+            <v-btn
+              v-shortkey="['arrowleft']"
+              @shortkey="handleSkip(-5)"
+              @click="handleSkip(-5)"
+            >
               <v-icon>mdi-rewind-5</v-icon>
             </v-btn>
-            <v-btn @click="handleSkip(5)">
+            <v-btn
+              v-shortkey="['arrowright']"
+              @shortkey="handleSkip(5)"
+              @click="handleSkip(5)"
+            >
               <v-icon>mdi-fast-forward-5</v-icon>
+            </v-btn>
+            <v-btn
+              v-shortkey="['shift', 'arrowright']"
+              @shortkey="handleSkip(10)"
+              @click="handleSkip(10)"
+            >
+              <v-icon>mdi-fast-forward-10</v-icon>
             </v-btn>
           </v-btn-toggle>
         </div>
@@ -107,27 +129,27 @@
           />
         </div>
       </div>
-      <div class="loopInfo">
-        <div>
-          <div>現在</div>
-          <div class="big">{{ currentTime }}</div>
-          <div class="text-subtitle-1">{{ currentSample }}</div>
-        </div>
-        <div>
-          <div>ループ開始</div>
-          <div class="big">{{ sampleStartTime }}</div>
-          <div class="text-subtitle-1">{{ sampleStart }}</div>
-        </div>
-        <div>
-          <div>ループ終了</div>
-          <div class="big">{{ sampleEndTime }}</div>
-          <div class="text-subtitle-1">{{ sampleEnd }}</div>
-        </div>
-        <div>
-          <div>ループ長</div>
-          <div class="big">{{ looplengthTime }}</div>
-          <div class="text-subtitle-1">{{ looplengthSample }}</div>
-        </div>
+    </div>
+    <div class="loopInfo my-4">
+      <div>
+        <div>現在</div>
+        <div class="big">{{ currentTime }}</div>
+        <div class="text-subtitle-1">{{ currentSample }}</div>
+      </div>
+      <div>
+        <div>ループ開始</div>
+        <div class="big">{{ sampleStartTime }}</div>
+        <div class="text-subtitle-1">{{ sampleStart }}</div>
+      </div>
+      <div>
+        <div>ループ終了</div>
+        <div class="big">{{ sampleEndTime }}</div>
+        <div class="text-subtitle-1">{{ sampleEnd }}</div>
+      </div>
+      <div>
+        <div>ループ長</div>
+        <div class="big">{{ looplengthTime }}</div>
+        <div class="text-subtitle-1">{{ looplengthSample }}</div>
       </div>
     </div>
     <div class="my-4" style="position: relative;">
