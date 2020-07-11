@@ -1,7 +1,10 @@
 <template>
   <v-app dark>
     <v-app-bar extended dark flat>
-      <v-toolbar-title v-text="title" />
+      <v-toolbar-title>
+        <v-icon>mdi-music-clef-treble</v-icon>
+        OGG Loop Editor
+      </v-toolbar-title>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -10,16 +13,6 @@
     </v-main>
   </v-app>
 </template>
-
-<script>
-export default {
-  data() {
-    return {
-      title: 'OGG Loop Editor',
-    }
-  },
-}
-</script>
 
 <style>
 .theme--light.v-application {

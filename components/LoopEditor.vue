@@ -130,26 +130,48 @@
         </div>
       </div>
     </div>
-    <div class="loopInfo my-6">
-      <div>
-        <div>現在</div>
-        <div class="big">{{ currentTime }}</div>
-        <div class="text-subtitle-1">{{ currentSample }}</div>
+    <div class="d-flex align-center justify-space-between">
+      <div class="loopInfo my-6">
+        <div>
+          <div>現在</div>
+          <div class="big">{{ currentTime }}</div>
+          <div class="text-subtitle-1">{{ currentSample }}</div>
+        </div>
+        <div>
+          <div>ループ開始</div>
+          <div class="big">{{ sampleStartTime }}</div>
+          <div class="text-subtitle-1">{{ sampleStart }}</div>
+        </div>
+        <div>
+          <div>ループ長</div>
+          <div class="big">{{ looplengthTime }}</div>
+          <div class="text-subtitle-1">{{ looplengthSample }}</div>
+        </div>
+        <div>
+          <div>ループ終了</div>
+          <div class="big">{{ sampleEndTime }}</div>
+          <div class="text-subtitle-1">{{ sampleEnd }}</div>
+        </div>
       </div>
-      <div>
-        <div>ループ開始</div>
-        <div class="big">{{ sampleStartTime }}</div>
-        <div class="text-subtitle-1">{{ sampleStart }}</div>
-      </div>
-      <div>
-        <div>ループ長</div>
-        <div class="big">{{ looplengthTime }}</div>
-        <div class="text-subtitle-1">{{ looplengthSample }}</div>
-      </div>
-      <div>
-        <div>ループ終了</div>
-        <div class="big">{{ sampleEndTime }}</div>
-        <div class="text-subtitle-1">{{ sampleEnd }}</div>
+      <div class="loop-controls">
+        <v-btn-toggle>
+          <v-btn
+            v-shortkey="['n']"
+            @shortkey="handleRepeat(6)"
+            @click="handleRepeat(6)"
+          >
+            <v-icon>mdi-twitter-retweet</v-icon>
+            <span>6</span>
+          </v-btn>
+          <v-btn
+            v-shortkey="['m']"
+            @shortkey="handleRepeat(3)"
+            @click="handleRepeat(3)"
+          >
+            <v-icon>mdi-twitter-retweet</v-icon>
+            <span>3</span>
+          </v-btn>
+        </v-btn-toggle>
       </div>
     </div>
     <div class="my-4" style="position: relative;">
@@ -315,6 +337,10 @@ export default {
     },
     handleSkip(offset) {
       this.wavesurfer.skip(offset)
+    },
+    handleRepeat(offset) {
+      const sec = this.region.end - offset
+      this.wavesurfer.play(sec)
     },
     resetZoom() {
       this.zoomVal = 0
