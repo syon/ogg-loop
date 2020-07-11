@@ -22,6 +22,12 @@ def root():
           <input type=text name=looplength value=500000>
           <input type=submit value=Upload>
         </form>
+        <hr />
+        <h1>/api/echo</h1>
+        <form action=/api/echo method=post enctype=multipart/form-data>
+          <input type=file name=myfile>
+          <input type=submit value=Upload>
+        </form>
         '''
 
 
@@ -56,6 +62,19 @@ def write():
         ogg.save()
         print(ogg)
         filename = 'loop.ogg'
+        return send_file(tmp.name, mimetype='audio/ogg', as_attachment=True, attachment_filename=filename)
+
+
+@app.route('/api/echo', methods=['POST'])
+def echo():
+    if request.method == 'POST':
+        myfile = request.files['myfile']
+        tmp = tempfile.NamedTemporaryFile()
+        print(tmp.name)
+        with open(tmp.name, "wb") as f:
+            f.write(myfile.read())
+            f.close()
+        filename = 'echo.ogg'
         return send_file(tmp.name, mimetype='audio/ogg', as_attachment=True, attachment_filename=filename)
 
 
