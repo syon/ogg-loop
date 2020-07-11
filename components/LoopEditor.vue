@@ -219,7 +219,16 @@ export default {
       this.refresh()
     },
   },
+  async mounted() {
+    await this.applySampleAudio()
+  },
   methods: {
+    async applySampleAudio() {
+      const url = `${location.origin}/TropicalBeach.ogg`
+      const m = await this.$axios.$get(url, { responseType: 'blob' })
+      m.name = 'TropicalBeach.ogg'
+      this.$store.dispatch('dropper/load', [m])
+    },
     refresh() {
       this.myfile = this.gFile
       this.load(this.gFileBuffer)
@@ -245,7 +254,11 @@ export default {
         this.audioprocess = this.wavesurfer.getCurrentTime()
       })
 
-      this.wavesurfer.load(fileBuffer)
+      if (fileBuffer) {
+        this.wavesurfer.load(fileBuffer)
+      } else {
+        // this.wavesurfer.loadBlob()
+      }
 
       this.changeVolume()
 
