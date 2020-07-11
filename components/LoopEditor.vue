@@ -12,11 +12,10 @@
           label="OGG File"
           hide-details
           style="width: 400px;"
+          class="mr-4"
         />
         <template v-if="!metaReady">
-          <v-btn class="ml-4" depressed @click="handleScanOgg"
-            >ループ情報を読み取る</v-btn
-          >
+          <v-btn depressed @click="handleScanOgg">ループ情報を読み取る</v-btn>
         </template>
         <template v-else>
           <v-menu open-on-hover min-width="250">
@@ -205,6 +204,8 @@ export default {
   },
   watch: {
     gLastLoaded() {
+      this.meta = {}
+      this.metaReady = false
       this.refresh()
     },
   },
