@@ -62,6 +62,7 @@
             hide-details
             label="ループ"
             style="margin: 0;"
+            @click="handleChangeLoop"
           />
         </div>
         <div>
@@ -320,6 +321,9 @@ export default {
     },
     calcSample(sec) {
       return Math.round(sec * 44100)
+    },
+    handleChangeLoop() {
+      this.region.loop = false
     },
     async handleScanOgg() {
       this.loading = true
