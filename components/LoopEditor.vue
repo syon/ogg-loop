@@ -18,11 +18,9 @@
           <v-btn depressed @click="handleScanOgg">ループ情報を読み取る</v-btn>
         </template>
         <template v-else>
-          <v-menu open-on-hover min-width="250">
+          <v-menu :close-on-content-click="false" min-width="250">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn color="primary" dark v-bind="attrs" v-on="on">
-                メタデータ
-              </v-btn>
+              <v-btn v-bind="attrs" v-on="on">メタデータ</v-btn>
             </template>
             <v-card>
               <v-card-text v-for="(v, k) in meta" :key="k">
@@ -214,7 +212,6 @@ export default {
   },
   watch: {
     gLastLoaded() {
-      this.meta = {}
       this.metaReady = false
       this.refresh()
     },
@@ -228,6 +225,7 @@ export default {
       const m = await this.$axios.$get(url, { responseType: 'blob' })
       m.name = 'TropicalBeach.ogg'
       this.$store.dispatch('dropper/load', [m])
+      this.meta = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
     },
     refresh() {
       this.myfile = this.gFile
