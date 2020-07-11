@@ -1,10 +1,10 @@
 <template>
   <v-app dark>
-    <v-app-bar extended flat color="primary" dark>
+    <v-app-bar extended dark flat>
       <v-toolbar-title v-text="title" />
     </v-app-bar>
     <v-main>
-      <v-container class="grey lighten-3">
+      <v-container>
         <nuxt />
       </v-container>
     </v-main>
@@ -22,7 +22,18 @@ export default {
 </script>
 
 <style>
-.v-main__wrap {
-  /* background-color: #f8f8f8; */
+.theme--light.v-application {
+  background-image: url(/sea.jpg);
+}
+.v-application--wrap {
+  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.2);
+}
+.theme--dark.v-app-bar.v-toolbar.v-sheet {
+  background-color: transparent;
+}
+.v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
+  padding-top: 6px;
+  align-self: flex-start;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-card class="LoopEditor pa-8">
+  <v-card class="LoopEditor pa-8" min-height="85vh">
     <drop-zone />
     <div class="d-flex align-center justify-space-between">
       <div class="d-flex align-center">
@@ -98,7 +98,7 @@
             </v-btn>
           </v-btn-toggle>
         </div>
-        <div class="xx-volume d-flex align-center" style="width: 120px;">
+        <div class="xx-volume d-flex align-center" style="width: 150px;">
           <v-slider
             v-model="volumeVal"
             prepend-icon="mdi-volume-high"
@@ -130,7 +130,7 @@
         </div>
       </div>
     </div>
-    <div style="position: relative;">
+    <div class="my-4" style="position: relative;">
       <div id="waveform"></div>
       <div id="waveform-minimap"></div>
     </div>
@@ -365,7 +365,6 @@ body {
   margin: auto;
   padding-left: 16px;
   padding-right: 16px;
-  background: #fff;
 }
 .LoopEditor {
   width: 100%;
