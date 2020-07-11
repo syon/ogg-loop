@@ -65,14 +65,11 @@
         </div>
         <div>
           <v-btn-toggle>
-            <v-btn @change="changeZoom('minus')">
-              <v-icon>mdi-minus</v-icon>
+            <v-btn @click="handleSkip(-5)">
+              <v-icon>mdi-rewind-5</v-icon>
             </v-btn>
-            <v-btn @change="changeZoom('')">
-              <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-            <v-btn @change="changeZoom('plus')">
-              <v-icon>mdi-plus</v-icon>
+            <v-btn @click="handleSkip(5)">
+              <v-icon>mdi-fast-forward-5</v-icon>
             </v-btn>
           </v-btn-toggle>
         </div>
@@ -84,6 +81,19 @@
             <v-btn value="1.0">1.0</v-btn>
             <v-btn value="1.5">1.5</v-btn>
             <v-btn value="2.0">2.0</v-btn>
+          </v-btn-toggle>
+        </div>
+        <div>
+          <v-btn-toggle>
+            <v-btn @change="changeZoom('minus')">
+              <v-icon>mdi-minus</v-icon>
+            </v-btn>
+            <v-btn @change="changeZoom('')">
+              <v-icon>mdi-magnify</v-icon>
+            </v-btn>
+            <v-btn @change="changeZoom('plus')">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
           </v-btn-toggle>
         </div>
         <div class="xx-volume d-flex align-center" style="width: 120px;">
@@ -258,6 +268,9 @@ export default {
     },
     pause() {
       this.wavesurfer.pause()
+    },
+    handleSkip(offset) {
+      this.wavesurfer.skip(offset)
     },
     resetZoom() {
       this.zoomVal = 0
