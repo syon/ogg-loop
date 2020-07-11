@@ -399,11 +399,12 @@ body {
   margin-bottom: 1em;
 }
 region.wavesurfer-region {
-  height: 80% !important;
-  /* z-index: 0 !important; */
+  height: 50% !important;
+  z-index: 9 !important;
 }
 region .wavesurfer-handle {
   background-color: #f57f17 !important;
+  width: 2px !important;
 }
 .loopInfo {
   display: flex;
