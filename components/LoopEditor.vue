@@ -13,9 +13,28 @@
           hide-details
           style="width: 400px;"
         />
-        <v-btn class="ml-4" depressed @click="handleScanOgg"
-          >ループ情報を読み取る</v-btn
-        >
+        <template v-if="!metaReady">
+          <v-btn class="ml-4" depressed @click="handleScanOgg"
+            >ループ情報を読み取る</v-btn
+          >
+        </template>
+        <template v-else>
+          <v-menu open-on-hover min-width="250">
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn color="primary" dark v-bind="attrs" v-on="on">
+                メタデータ
+              </v-btn>
+            </template>
+            <v-list>
+              <v-list-item v-for="(v, k) in meta" :key="k">
+                <v-list-item-title>{{ k }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right">
+                  {{ v }}
+                </v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+        </template>
       </div>
       <form
         action="/api/write"
@@ -131,6 +150,7 @@ export default {
       wavesurfer: null,
       region: {},
       meta: {},
+      metaReady: false,
       loading: false,
     }
   },
@@ -265,6 +285,7 @@ export default {
         alert('Scan Error.')
       }
       this.refresh()
+      this.metaReady = true
       this.loading = false
     },
     async handleSubmit() {

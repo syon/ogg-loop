@@ -19,6 +19,7 @@ export const getters = {
     return state.buffer
   },
   gFileInfo(state) {
+    if (!state.file) return {}
     const { name, size, type, lastModified, lastModifiedDate } = state.file
     return { name, size, type, lastModified, lastModifiedDate }
   },
