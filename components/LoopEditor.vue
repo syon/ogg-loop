@@ -43,10 +43,10 @@
     <v-divider class="my-8" />
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
-        <div class="buttons">
+        <div class="d-flex align-center">
           <v-btn
             v-shortkey="['space']"
-            class="mr-4"
+            class="mr-6"
             @shortkey="playPause"
             @click="playPause"
           >
@@ -57,9 +57,12 @@
               <v-icon v-text="'mdi-pause'" />
             </template>
           </v-btn>
-          <v-btn @click="regionPlayLoop">
-            <v-icon left>mdi-twitter-retweet</v-icon>ループ再生
-          </v-btn>
+          <v-switch
+            v-model="loop"
+            hide-details
+            label="ループ"
+            style="margin: 0;"
+          />
         </div>
         <div>
           <v-btn-toggle>
@@ -159,6 +162,7 @@ export default {
       meta: {},
       metaReady: false,
       loading: false,
+      loop: true,
     }
   },
   computed: {
@@ -249,21 +253,27 @@ export default {
       })
 
       this.wavesurfer.on('seek', (a, b) => {
-        this.audioprocess = this.wavesurfer.getCurrentTime()
+        const sec = this.wavesurfer.getCurrentTime()
+        this.audioprocess = sec
+        if (sec < region.start || region.end < sec) {
+          region.loop = false
+        }
       })
 
       if (fileBuffer) {
         this.wavesurfer.load(fileBuffer)
-      } else {
-        // this.wavesurfer.loadBlob()
       }
 
       this.changeVolume()
 
-      // this.wavesurfer.on('region-click', (region) => {
-      //   region.loop = false
-      //   // this.wavesurfer.clearRegions()
-      // })
+      this.wavesurfer.on('region-in', (region) => {
+        if (this.loop) {
+          region.loop = true
+        }
+      })
+      this.wavesurfer.on('region-out', (region) => {
+        region.loop = false
+      })
     },
     formatTime(v) {
       let sec = v
@@ -307,9 +317,6 @@ export default {
     },
     changeSpeed() {
       this.wavesurfer.setPlaybackRate(Number(this.speedVal))
-    },
-    regionPlayLoop() {
-      this.region.playLoop()
     },
     calcSample(sec) {
       return Math.round(sec * 44100)
