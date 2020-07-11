@@ -64,13 +64,16 @@
           </v-btn>
         </div>
         <div>
-          <v-icon left>mdi-magnify-plus-outline</v-icon>
-          <v-btn-toggle v-model="zoomVal" @change="changeZoom">
-            <v-btn :value="0">0</v-btn>
-            <v-btn :value="50">10</v-btn>
-            <v-btn :value="100">20</v-btn>
-            <v-btn :value="500">100</v-btn>
-            <v-btn :value="5000">1000</v-btn>
+          <v-btn-toggle>
+            <v-btn @change="changeZoom('minus')">
+              <v-icon>mdi-minus</v-icon>
+            </v-btn>
+            <v-btn @change="changeZoom('')">
+              <v-icon>mdi-magnify</v-icon>
+            </v-btn>
+            <v-btn @change="changeZoom('plus')">
+              <v-icon>mdi-plus</v-icon>
+            </v-btn>
           </v-btn-toggle>
         </div>
         <div>
@@ -260,8 +263,20 @@ export default {
       this.zoomVal = 0
       this.wavesurfer.zoom(0)
     },
-    changeZoom() {
-      this.wavesurfer.zoom(Number(this.zoomVal))
+    changeZoom(sub) {
+      switch (sub) {
+        case 'minus':
+          this.zoomVal = this.zoomVal <= 20 ? 0 : this.zoomVal - 20
+          this.wavesurfer.zoom(Number(this.zoomVal))
+          break
+        case 'plus':
+          this.zoomVal += 20
+          this.wavesurfer.zoom(Number(this.zoomVal))
+          break
+        default:
+          this.wavesurfer.zoom(0)
+          break
+      }
     },
     changeVolume() {
       this.wavesurfer.setVolume(Number(this.volumeVal / 100))
