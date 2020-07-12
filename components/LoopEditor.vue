@@ -67,8 +67,50 @@
       </form>
     </div>
     <v-divider class="my-6" />
+
     <div class="controls my-2">
-      <div class="d-flex justify-space-between">
+      <div class="d-flex justify-space-around">
+        <div class="xx-nostate">
+          <v-btn-toggle>
+            <cmd-btn :shortkey="['i']" @do="changeZoom('')">
+              <v-icon>mdi-magnify</v-icon>
+              <template #tooltip>I</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['o']" @do="changeZoom('minus')">
+              <v-icon>mdi-minus</v-icon>
+              <template #tooltip>O</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['p']" @do="changeZoom('plus')">
+              <v-icon>mdi-plus</v-icon>
+              <template #tooltip>P</template>
+            </cmd-btn>
+          </v-btn-toggle>
+        </div>
+        <div>
+          <v-icon left>mdi-fast-forward</v-icon>
+          <v-btn-toggle v-model="speedVal" mandatory>
+            <cmd-btn :shortkey="['g']" :value="0.2" @do="changeSpeed(0.2)">
+              0.2
+              <template #tooltip>G</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['h']" :value="0.5" @do="changeSpeed(0.5)">
+              0.5
+              <template #tooltip>H</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['j']" :value="1.0" @do="changeSpeed(1.0)">
+              1.0
+              <template #tooltip>J</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['k']" :value="1.5" @do="changeSpeed(1.5)">
+              1.5
+              <template #tooltip>K</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['l']" :value="2.0" @do="changeSpeed(2.0)">
+              2.0
+              <template #tooltip>L</template>
+            </cmd-btn>
+          </v-btn-toggle>
+        </div>
         <div class="xx-nostate">
           <v-btn-toggle>
             <cmd-btn :shortkey="['shift', 'arrowleft']" @do="handleSkip(-10)">
@@ -111,47 +153,6 @@
             </cmd-btn>
           </v-btn-toggle>
         </div>
-        <div>
-          <v-icon left>mdi-fast-forward</v-icon>
-          <v-btn-toggle v-model="speedVal" mandatory>
-            <cmd-btn :shortkey="['g']" :value="0.2" @do="changeSpeed(0.2)">
-              0.2
-              <template #tooltip>G</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['h']" :value="0.5" @do="changeSpeed(0.5)">
-              0.5
-              <template #tooltip>H</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['j']" :value="1.0" @do="changeSpeed(1.0)">
-              1.0
-              <template #tooltip>J</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['k']" :value="1.5" @do="changeSpeed(1.5)">
-              1.5
-              <template #tooltip>K</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['l']" :value="2.0" @do="changeSpeed(2.0)">
-              2.0
-              <template #tooltip>L</template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
-        <div class="xx-nostate">
-          <v-btn-toggle>
-            <cmd-btn :shortkey="['i']" @do="changeZoom('')">
-              <v-icon>mdi-magnify</v-icon>
-              <template #tooltip>I</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['o']" @do="changeZoom('minus')">
-              <v-icon>mdi-minus</v-icon>
-              <template #tooltip>O</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['p']" @do="changeZoom('plus')">
-              <v-icon>mdi-plus</v-icon>
-              <template #tooltip>P</template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
         <div class="xx-volume d-flex align-center" style="width: 150px;">
           <v-slider
             v-model="volumeVal"
@@ -162,7 +163,8 @@
         </div>
       </div>
     </div>
-    <div class="d-flex align-center justify-center">
+
+    <div class="d-flex align-center justify-center my-6">
       <div class="d-flex align-center">
         <cmd-btn :shortkey="['space']" @do="playPause">
           <template v-if="!isPlaying">
@@ -185,9 +187,9 @@
         />
       </div>
 
-      <v-divider vertical class="mx-8 my-8" />
+      <v-divider vertical class="mx-8 my-4" />
 
-      <div class="loopInfo d-flex my-4">
+      <div class="loopInfo d-flex">
         <v-card flat>
           <v-card-subtitle class="pb-2">Current</v-card-subtitle>
           <v-card-text>
@@ -226,6 +228,7 @@
         </v-card>
       </div>
     </div>
+
     <div class="my-4" style="position: relative;">
       <div id="waveform-timeline"></div>
       <div id="waveform"></div>
