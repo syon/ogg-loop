@@ -9,7 +9,7 @@
           accept="audio/ogg"
           show-size
           outlined
-          label="OGG File"
+          label="Ogg File"
           hide-details
           style="width: 400px;"
           class="mr-4"
