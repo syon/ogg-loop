@@ -6,15 +6,12 @@
         Ogg Loop Editor
       </v-toolbar-title>
       <v-spacer />
-      <a
-        href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-        class="twitter-share-button"
-        data-url="https://oggloop.vercel.app/"
-        data-hashtags="oggloop"
-        data-show-count="false"
-        style="margin-right: 32px;"
-        >Tweet</a
-      >
+      <v-btn
+        href="https://twitter.com/intent/tweet?hashtags=oggloop&amp;original_referer=http%3A%2F%2Flocalhost%3A3000%2F&amp;ref_src=twsrc%5Etfw&amp;text=Ogg%20Loop%20Editor&amp;tw_p=tweetbutton&amp;url=https%3A%2F%2Foggloop.vercel.app%2F"
+        target="_blank"
+        icon
+        ><v-icon color="#1DA1F2">mdi-twitter</v-icon>
+      </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
