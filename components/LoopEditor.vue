@@ -97,62 +97,30 @@
         </div>
         <div class="xx-nostate">
           <v-btn-toggle>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-shortkey="['shift', 'arrowleft']"
-                  v-bind="attrs"
-                  v-on="on"
-                  @shortkey="handleSkip(-10)"
-                  @click="handleSkip(-10)"
-                >
-                  <v-icon>mdi-rewind-10</v-icon>
-                </v-btn>
+            <cmd-btn :shortkey="['shift', 'arrowleft']" @do="handleSkip(-10)">
+              <v-icon>mdi-rewind-10</v-icon>
+              <template #tooltip>
+                <span>Shift + <v-icon dark small>mdi-arrow-left</v-icon></span>
               </template>
-              <span>Shift + <v-icon dark small>mdi-arrow-left</v-icon></span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-shortkey="['arrowleft']"
-                  v-bind="attrs"
-                  v-on="on"
-                  @shortkey="handleSkip(-5)"
-                  @click="handleSkip(-5)"
-                >
-                  <v-icon>mdi-rewind-5</v-icon>
-                </v-btn>
+            </cmd-btn>
+            <cmd-btn :shortkey="['arrowleft']" @do="handleSkip(-5)">
+              <v-icon>mdi-rewind-5</v-icon>
+              <template #tooltip>
+                <span><v-icon dark small>mdi-arrow-left</v-icon></span>
               </template>
-              <span><v-icon dark small>mdi-arrow-left</v-icon></span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-shortkey="['arrowright']"
-                  v-bind="attrs"
-                  v-on="on"
-                  @shortkey="handleSkip(5)"
-                  @click="handleSkip(5)"
-                >
-                  <v-icon>mdi-fast-forward-5</v-icon>
-                </v-btn>
+            </cmd-btn>
+            <cmd-btn :shortkey="['arrowright']" @do="handleSkip(5)">
+              <v-icon>mdi-fast-forward-5</v-icon>
+              <template #tooltip>
+                <span><v-icon dark small>mdi-arrow-right</v-icon></span>
               </template>
-              <span><v-icon dark small>mdi-arrow-right</v-icon></span>
-            </v-tooltip>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn
-                  v-shortkey="['shift', 'arrowright']"
-                  v-bind="attrs"
-                  v-on="on"
-                  @shortkey="handleSkip(10)"
-                  @click="handleSkip(10)"
-                >
-                  <v-icon>mdi-fast-forward-10</v-icon>
-                </v-btn>
+            </cmd-btn>
+            <cmd-btn :shortkey="['shift', 'arrowright']" @do="handleSkip(10)">
+              <v-icon>mdi-fast-forward-10</v-icon>
+              <template #tooltip>
+                <span>Shift + <v-icon dark small>mdi-arrow-right</v-icon></span>
               </template>
-              <span>Shift + <v-icon dark small>mdi-arrow-right</v-icon></span>
-            </v-tooltip>
+            </cmd-btn>
           </v-btn-toggle>
         </div>
         <div>
