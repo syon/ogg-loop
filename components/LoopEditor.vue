@@ -259,7 +259,7 @@ export default {
       audioprocess: 0,
       zoomVal: 0,
       volumeVal: 50,
-      speedVal: '1.0',
+      speedVal: 1.0,
       wavesurfer: null,
       region: {},
       meta: {},
@@ -391,15 +391,8 @@ export default {
       if (!v) sec = 0
       return new Date(sec * 1000).toISOString().slice(14, -1)
     },
-    play() {
-      // this.wavesurfer.play(this.wavesurfer.getCurrentTime())
-      this.wavesurfer.play()
-    },
     playPause() {
       this.wavesurfer.playPause()
-    },
-    pause() {
-      this.wavesurfer.pause()
     },
     handleSkip(offset) {
       this.wavesurfer.skip(offset)
