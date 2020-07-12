@@ -3,10 +3,11 @@
     <template v-slot:activator="{ on, attrs }">
       <v-btn
         v-shortkey="shortkey"
+        :value="$attrs.value"
         v-bind="attrs"
         v-on="on"
-        @shortkey="handleCommand(10)"
-        @click="handleCommand(10)"
+        @shortkey="handleCommand"
+        @click="handleCommand"
       >
         <slot />
       </v-btn>
@@ -22,6 +23,7 @@ export default {
   },
   methods: {
     handleCommand() {
+      console.log('[#handleCommand]')
       this.$emit('do')
     },
   },

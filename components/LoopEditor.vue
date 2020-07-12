@@ -157,12 +157,27 @@
         </div>
         <div>
           <v-icon left>mdi-fast-forward</v-icon>
-          <v-btn-toggle v-model="speedVal" mandatory @change="changeSpeed">
-            <v-btn value="0.2">0.2</v-btn>
-            <v-btn value="0.5">0.5</v-btn>
-            <v-btn value="1.0">1.0</v-btn>
-            <v-btn value="1.5">1.5</v-btn>
-            <v-btn value="2.0">2.0</v-btn>
+          <v-btn-toggle v-model="speedVal" mandatory>
+            <cmd-btn :shortkey="['g']" :value="0.2" @do="changeSpeed(0.2)">
+              0.2
+              <template #tooltip>G</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['h']" :value="0.5" @do="changeSpeed(0.5)">
+              0.5
+              <template #tooltip>H</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['j']" :value="1.0" @do="changeSpeed(1.0)">
+              1.0
+              <template #tooltip>J</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['k']" :value="1.5" @do="changeSpeed(1.5)">
+              1.5
+              <template #tooltip>K</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['l']" :value="2.0" @do="changeSpeed(2.0)">
+              2.0
+              <template #tooltip>L</template>
+            </cmd-btn>
           </v-btn-toggle>
         </div>
         <div class="xx-nostate">
@@ -447,8 +462,9 @@ export default {
     changeVolume() {
       this.wavesurfer.setVolume(Number(this.volumeVal / 100))
     },
-    changeSpeed() {
-      this.wavesurfer.setPlaybackRate(Number(this.speedVal))
+    changeSpeed(v) {
+      this.speedVal = v
+      this.wavesurfer.setPlaybackRate(Number(v))
     },
     calcSample(sec) {
       return Math.round(sec * 44100)
