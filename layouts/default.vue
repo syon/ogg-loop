@@ -5,6 +5,16 @@
         <v-icon>mdi-music-clef-treble</v-icon>
         Ogg Loop Editor
       </v-toolbar-title>
+      <v-spacer />
+      <a
+        href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+        class="twitter-share-button"
+        data-url="https://oggloop.vercel.app/"
+        data-hashtags="oggloop"
+        data-show-count="false"
+        style="margin-right: 32px;"
+        >Tweet</a
+      >
     </v-app-bar>
     <v-main>
       <v-container>
