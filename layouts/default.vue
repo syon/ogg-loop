@@ -40,10 +40,10 @@ export default {
 </script>
 
 <style>
-.theme--light.v-application {
+#__layout > .theme--light.v-application {
   background-image: url(/sea.jpg);
 }
-.v-application--wrap {
+#__layout > .theme--light.v-application .v-application--wrap {
   backdrop-filter: blur(5px);
   background: rgba(255, 255, 255, 0.2);
 }
