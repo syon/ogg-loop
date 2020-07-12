@@ -50,7 +50,7 @@ export default {
       {
         hid: 'og:image',
         property: 'og:image',
-        content: 'https://oggloop.vercel.app/ogimage.png',
+        content: 'https://oggloop.vercel.app/oggloop.png',
       },
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
