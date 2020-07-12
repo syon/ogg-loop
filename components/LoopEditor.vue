@@ -23,7 +23,10 @@
         <template v-else>
           <v-menu :close-on-content-click="false" min-width="250">
             <template v-slot:activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on">メタデータ</v-btn>
+              <v-btn v-bind="attrs" v-on="on">
+                <v-icon left>mdi-details</v-icon>
+                Meta
+              </v-btn>
             </template>
             <v-card>
               <v-card-text v-for="(v, k) in meta" :key="k">
