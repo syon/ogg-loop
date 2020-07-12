@@ -88,7 +88,7 @@
             @click="handleChangeLoop"
           />
         </div>
-        <div>
+        <div class="xx-nostate">
           <v-btn-toggle>
             <v-btn
               v-shortkey="['shift', 'arrowleft']"
@@ -130,7 +130,7 @@
             <v-btn value="2.0">2.0</v-btn>
           </v-btn-toggle>
         </div>
-        <div>
+        <div class="xx-nostate">
           <v-btn-toggle>
             <v-btn @change="changeZoom('minus')">
               <v-icon>mdi-minus</v-icon>
@@ -192,14 +192,14 @@
           </v-card-text>
         </v-card>
       </div>
-      <div class="loop-controls">
+      <div class="loop-controls xx-nostate">
         <v-btn-toggle>
           <v-btn
             v-shortkey="['n']"
             @shortkey="handleRepeat(6)"
             @click="handleRepeat(6)"
           >
-            <v-icon>mdi-twitter-retweet</v-icon>
+            <v-icon class="mr-1">mdi-update</v-icon>
             <span>6</span>
           </v-btn>
           <v-btn
@@ -207,7 +207,7 @@
             @shortkey="handleRepeat(3)"
             @click="handleRepeat(3)"
           >
-            <v-icon>mdi-twitter-retweet</v-icon>
+            <v-icon class="mr-1">mdi-update</v-icon>
             <span>3</span>
           </v-btn>
         </v-btn-toggle>
@@ -498,5 +498,9 @@ region .wavesurfer-handle {
 }
 .loopInfo .big {
   font-size: 1.5rem;
+}
+.xx-nostate
+  .v-btn:not(.v-btn--text):not(.v-btn--outlined).v-btn--active:before {
+  opacity: 0 !important;
 }
 </style>
