@@ -69,27 +69,6 @@
     <v-divider class="my-6" />
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
-        <div class="d-flex align-center">
-          <cmd-btn :shortkey="['shift', 'arrowleft']" @do="playPause">
-            <template v-if="!isPlaying">
-              <v-icon v-text="'mdi-play'" />
-            </template>
-            <template v-else>
-              <v-icon v-text="'mdi-pause'" />
-            </template>
-            <template #tooltip>
-              <span>Space</span>
-            </template>
-          </cmd-btn>
-          <v-switch
-            v-model="loop"
-            class="ml-6"
-            hide-details
-            label="Loop"
-            style="margin: 0;"
-            @click="handleChangeLoop"
-          />
-        </div>
         <div class="xx-nostate">
           <v-btn-toggle>
             <cmd-btn :shortkey="['shift', 'arrowleft']" @do="handleSkip(-10)">
@@ -183,7 +162,31 @@
         </div>
       </div>
     </div>
-    <div class="d-flex align-center justify-space-between">
+    <div class="d-flex align-center justify-center">
+      <div class="d-flex align-center">
+        <cmd-btn :shortkey="['space']" @do="playPause">
+          <template v-if="!isPlaying">
+            <v-icon v-text="'mdi-play'" />
+          </template>
+          <template v-else>
+            <v-icon v-text="'mdi-pause'" />
+          </template>
+          <template #tooltip>
+            <span>Space</span>
+          </template>
+        </cmd-btn>
+        <v-switch
+          v-model="loop"
+          class="ml-6"
+          hide-details
+          label="Loop"
+          style="margin: 0;"
+          @click="handleChangeLoop"
+        />
+      </div>
+
+      <v-divider vertical class="mx-8 my-8" />
+
       <div class="loopInfo d-flex my-4">
         <v-card flat>
           <v-card-subtitle class="pb-2">Current</v-card-subtitle>
