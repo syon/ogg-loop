@@ -49,6 +49,7 @@ export default {
     // Doc: https://github.com/nuxt-community/eslint-module
     '@nuxtjs/eslint-module',
     '@nuxtjs/vuetify',
+    'vue-browser-detect-plugin/nuxt',
     [
       '@nuxtjs/google-analytics',
       {
