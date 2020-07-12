@@ -490,7 +490,6 @@ body {
 .container {
   width: 100%;
   max-width: 100%;
-  min-height: 100vh;
   margin: auto;
   padding-left: 16px;
   padding-right: 16px;

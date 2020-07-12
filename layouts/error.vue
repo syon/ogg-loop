@@ -1,5 +1,5 @@
 <template>
-  <v-app dark>
+  <v-sheet>
     <h1 v-if="error.statusCode === 404">
       {{ pageNotFound }}
     </h1>
@@ -9,7 +9,7 @@
     <NuxtLink to="/">
       Home page
     </NuxtLink>
-  </v-app>
+  </v-sheet>
 </template>
 
 <script>

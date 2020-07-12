@@ -8,11 +8,29 @@
     </v-app-bar>
     <v-main>
       <v-container>
-        <nuxt />
+        <template v-if="isChrome">
+          <nuxt />
+        </template>
+        <template v-else>
+          <div class="white--text text-h4">
+            Sorry, OGG Loop Editor is currently only supported on the Google
+            Chrome browser.
+          </div>
+        </template>
       </v-container>
     </v-main>
   </v-app>
 </template>
+
+<script>
+export default {
+  computed: {
+    isChrome() {
+      return this.$browserDetect.isChrome
+    },
+  },
+}
+</script>
 
 <style>
 .theme--light.v-application {
