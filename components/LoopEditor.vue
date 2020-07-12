@@ -15,7 +15,10 @@
           class="mr-4"
         />
         <template v-if="!metaReady">
-          <v-btn depressed @click="handleScanOgg">ループ情報を読み取る</v-btn>
+          <v-btn depressed @click="handleScanOgg">
+            <v-icon left>mdi-spotlight-beam</v-icon>
+            Scan
+          </v-btn>
         </template>
         <template v-else>
           <v-menu :close-on-content-click="false" min-width="250">
@@ -90,7 +93,7 @@
           <v-switch
             v-model="loop"
             hide-details
-            label="ループ"
+            label="Loop"
             style="margin: 0;"
             @click="handleChangeLoop"
           />
