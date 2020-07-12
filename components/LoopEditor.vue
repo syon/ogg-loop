@@ -70,28 +70,20 @@
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
         <div class="d-flex align-center">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                v-shortkey="['space']"
-                class="mr-6"
-                v-bind="attrs"
-                v-on="on"
-                @shortkey="playPause"
-                @click="playPause"
-              >
-                <template v-if="!isPlaying">
-                  <v-icon v-text="'mdi-play'" />
-                </template>
-                <template v-else>
-                  <v-icon v-text="'mdi-pause'" />
-                </template>
-              </v-btn>
+          <cmd-btn :shortkey="['shift', 'arrowleft']" @do="playPause">
+            <template v-if="!isPlaying">
+              <v-icon v-text="'mdi-play'" />
             </template>
-            <span>Space</span>
-          </v-tooltip>
+            <template v-else>
+              <v-icon v-text="'mdi-pause'" />
+            </template>
+            <template #tooltip>
+              <span>Space</span>
+            </template>
+          </cmd-btn>
           <v-switch
             v-model="loop"
+            class="ml-6"
             hide-details
             label="Loop"
             style="margin: 0;"
@@ -123,6 +115,20 @@
               <template #tooltip>
                 <span>Shift + <v-icon dark small>mdi-arrow-right</v-icon></span>
               </template>
+            </cmd-btn>
+          </v-btn-toggle>
+        </div>
+        <div class="loop-controls xx-nostate">
+          <v-btn-toggle>
+            <cmd-btn :shortkey="['n']" @do="handleRepeat(6)">
+              <v-icon class="mr-1">mdi-update</v-icon>
+              <span>6</span>
+              <template #tooltip>N</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['m']" @do="handleRepeat(3)">
+              <v-icon class="mr-1">mdi-update</v-icon>
+              <span>3</span>
+              <template #tooltip>M</template>
             </cmd-btn>
           </v-btn-toggle>
         </div>
@@ -215,20 +221,6 @@
             <div class="pt-1 text-subtitle-1">{{ sampleEnd }}</div>
           </v-card-text>
         </v-card>
-      </div>
-      <div class="loop-controls xx-nostate">
-        <v-btn-toggle>
-          <cmd-btn :shortkey="['n']" @do="handleRepeat(6)">
-            <v-icon class="mr-1">mdi-update</v-icon>
-            <span>6</span>
-            <template #tooltip>N</template>
-          </cmd-btn>
-          <cmd-btn :shortkey="['m']" @do="handleRepeat(3)">
-            <v-icon class="mr-1">mdi-update</v-icon>
-            <span>3</span>
-            <template #tooltip>M</template>
-          </cmd-btn>
-        </v-btn-toggle>
       </div>
     </div>
     <div class="my-4" style="position: relative;">
