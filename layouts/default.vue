@@ -3,7 +3,7 @@
     <v-app-bar extended dark flat>
       <v-toolbar-title>
         <v-icon>mdi-music-clef-treble</v-icon>
-        OGG Loop Editor
+        Ogg Loop Editor
       </v-toolbar-title>
     </v-app-bar>
     <v-main>
@@ -12,8 +12,15 @@
           <nuxt />
         </template>
         <template v-else>
-          <div class="white--text text-h4">
-            Sorry, OGG Loop Editor is currently only supported on the Google
+          <div class="screenshot-wrap">
+            <img
+              class="screenshot"
+              src="/oggloop.png"
+              alt="Ogg Loop Editor Screenshot"
+            />
+          </div>
+          <div class="white--text text-body-2 text-center pb-12">
+            Sorry, Ogg Loop Editor is currently only supported on the Google
             Chrome browser.
           </div>
         </template>
@@ -46,5 +53,12 @@ export default {
 .v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
   padding-top: 6px;
   align-self: flex-start;
+}
+.screenshot-wrap {
+  max-width: 800px;
+  margin: auto;
+}
+.screenshot {
+  width: 100%;
 }
 </style>
