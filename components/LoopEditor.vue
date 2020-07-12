@@ -214,6 +214,7 @@
       </div>
     </div>
     <div class="my-4" style="position: relative;">
+      <div id="waveform-timeline"></div>
       <div id="waveform"></div>
       <div id="waveform-minimap"></div>
     </div>
