@@ -67,19 +67,26 @@
     <div class="controls my-2">
       <div class="d-flex justify-space-between">
         <div class="d-flex align-center">
-          <v-btn
-            v-shortkey="['space']"
-            class="mr-6"
-            @shortkey="playPause"
-            @click="playPause"
-          >
-            <template v-if="!isPlaying">
-              <v-icon v-text="'mdi-play'" />
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-shortkey="['space']"
+                class="mr-6"
+                v-bind="attrs"
+                v-on="on"
+                @shortkey="playPause"
+                @click="playPause"
+              >
+                <template v-if="!isPlaying">
+                  <v-icon v-text="'mdi-play'" />
+                </template>
+                <template v-else>
+                  <v-icon v-text="'mdi-pause'" />
+                </template>
+              </v-btn>
             </template>
-            <template v-else>
-              <v-icon v-text="'mdi-pause'" />
-            </template>
-          </v-btn>
+            <span>Space</span>
+          </v-tooltip>
           <v-switch
             v-model="loop"
             hide-details
@@ -90,34 +97,62 @@
         </div>
         <div class="xx-nostate">
           <v-btn-toggle>
-            <v-btn
-              v-shortkey="['shift', 'arrowleft']"
-              @shortkey="handleSkip(-10)"
-              @click="handleSkip(-10)"
-            >
-              <v-icon>mdi-rewind-10</v-icon>
-            </v-btn>
-            <v-btn
-              v-shortkey="['arrowleft']"
-              @shortkey="handleSkip(-5)"
-              @click="handleSkip(-5)"
-            >
-              <v-icon>mdi-rewind-5</v-icon>
-            </v-btn>
-            <v-btn
-              v-shortkey="['arrowright']"
-              @shortkey="handleSkip(5)"
-              @click="handleSkip(5)"
-            >
-              <v-icon>mdi-fast-forward-5</v-icon>
-            </v-btn>
-            <v-btn
-              v-shortkey="['shift', 'arrowright']"
-              @shortkey="handleSkip(10)"
-              @click="handleSkip(10)"
-            >
-              <v-icon>mdi-fast-forward-10</v-icon>
-            </v-btn>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-shortkey="['shift', 'arrowleft']"
+                  v-bind="attrs"
+                  v-on="on"
+                  @shortkey="handleSkip(-10)"
+                  @click="handleSkip(-10)"
+                >
+                  <v-icon>mdi-rewind-10</v-icon>
+                </v-btn>
+              </template>
+              <span>Shift + <v-icon dark small>mdi-arrow-left</v-icon></span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-shortkey="['arrowleft']"
+                  v-bind="attrs"
+                  v-on="on"
+                  @shortkey="handleSkip(-5)"
+                  @click="handleSkip(-5)"
+                >
+                  <v-icon>mdi-rewind-5</v-icon>
+                </v-btn>
+              </template>
+              <span><v-icon dark small>mdi-arrow-left</v-icon></span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-shortkey="['arrowright']"
+                  v-bind="attrs"
+                  v-on="on"
+                  @shortkey="handleSkip(5)"
+                  @click="handleSkip(5)"
+                >
+                  <v-icon>mdi-fast-forward-5</v-icon>
+                </v-btn>
+              </template>
+              <span><v-icon dark small>mdi-arrow-right</v-icon></span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-shortkey="['shift', 'arrowright']"
+                  v-bind="attrs"
+                  v-on="on"
+                  @shortkey="handleSkip(10)"
+                  @click="handleSkip(10)"
+                >
+                  <v-icon>mdi-fast-forward-10</v-icon>
+                </v-btn>
+              </template>
+              <span>Shift + <v-icon dark small>mdi-arrow-right</v-icon></span>
+            </v-tooltip>
           </v-btn-toggle>
         </div>
         <div>
@@ -132,15 +167,18 @@
         </div>
         <div class="xx-nostate">
           <v-btn-toggle>
-            <v-btn @change="changeZoom('minus')">
-              <v-icon>mdi-minus</v-icon>
-            </v-btn>
-            <v-btn @change="changeZoom('')">
+            <cmd-btn :shortkey="['i']" @do="changeZoom('')">
               <v-icon>mdi-magnify</v-icon>
-            </v-btn>
-            <v-btn @change="changeZoom('plus')">
+              <template #tooltip>I</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['o']" @do="changeZoom('minus')">
+              <v-icon>mdi-minus</v-icon>
+              <template #tooltip>O</template>
+            </cmd-btn>
+            <cmd-btn :shortkey="['p']" @do="changeZoom('plus')">
               <v-icon>mdi-plus</v-icon>
-            </v-btn>
+              <template #tooltip>P</template>
+            </cmd-btn>
           </v-btn-toggle>
         </div>
         <div class="xx-volume d-flex align-center" style="width: 150px;">
@@ -194,22 +232,16 @@
       </div>
       <div class="loop-controls xx-nostate">
         <v-btn-toggle>
-          <v-btn
-            v-shortkey="['n']"
-            @shortkey="handleRepeat(6)"
-            @click="handleRepeat(6)"
-          >
+          <cmd-btn :shortkey="['n']" @do="handleRepeat(6)">
             <v-icon class="mr-1">mdi-update</v-icon>
             <span>6</span>
-          </v-btn>
-          <v-btn
-            v-shortkey="['m']"
-            @shortkey="handleRepeat(3)"
-            @click="handleRepeat(3)"
-          >
+            <template #tooltip>N</template>
+          </cmd-btn>
+          <cmd-btn :shortkey="['m']" @do="handleRepeat(3)">
             <v-icon class="mr-1">mdi-update</v-icon>
             <span>3</span>
-          </v-btn>
+            <template #tooltip>M</template>
+          </cmd-btn>
         </v-btn-toggle>
       </div>
     </div>
@@ -228,12 +260,14 @@
 import { mapGetters } from 'vuex'
 import FileDownload from 'js-file-download'
 import DropZone from '@/components/DropZone'
+import CmdBtn from '@/components/CmdBtn'
 import Ogg from '@/lib/Ogg'
 import Surf from '@/lib/Surf'
 
 export default {
   components: {
     DropZone,
+    CmdBtn,
   },
   data() {
     return {
@@ -405,6 +439,7 @@ export default {
           this.wavesurfer.zoom(Number(this.zoomVal))
           break
         default:
+          this.zoomVal = 0
           this.wavesurfer.zoom(0)
           break
       }
