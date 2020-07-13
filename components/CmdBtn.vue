@@ -4,6 +4,7 @@
       <v-btn
         v-shortkey="shortkey"
         :value="$attrs.value"
+        :icon="icon"
         v-bind="attrs"
         v-on="on"
         @shortkey="handleCommand"
@@ -20,6 +21,7 @@
 export default {
   props: {
     shortkey: { type: Array, default: () => [] },
+    icon: { type: Boolean, default: false },
   },
   methods: {
     handleCommand() {
