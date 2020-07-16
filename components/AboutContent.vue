@@ -28,16 +28,19 @@
         </div>
       </div>
       <div class="xx-libraries mt-8 grey--text text--darken-1">
-        <div class="overline">Libraries</div>
+        <div class="overline">Frontend</div>
+        <a href="https://nuxtjs.org/" target="_blank">Nuxt.js</a>
+        ・
         <a href="https://vuetifyjs.com/" target="_blank">Vuetify</a>
         ・
         <a href="https://wavesurfer-js.org/" target="_blank">wavesurfer.js</a>
+
+        <div class="overline mt-4">Backend</div>
+        <a href="https://vercel.com/" target="_blank">Vercel</a>
         ・
         <a href="https://mutagen.readthedocs.io/en/latest/" target="_blank"
           >Mutagen</a
         >
-        ・
-        <a href="https://vercel.com/" target="_blank">Vercel</a>
       </div>
     </div>
   </v-card>
