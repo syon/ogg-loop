@@ -55,6 +55,10 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
+  env: {
+    DISCORD_WEBHOOK:
+      'https://discord.com/api/webhooks/795600132229300274/kgSevzKqzXdqBZrCiVCrUWXPNxD4vFzBU7CXXy9qpiFTQfFdriJSvirqqXpDBenvGD1y',
+  },
   /*
    ** Global CSS
    */
