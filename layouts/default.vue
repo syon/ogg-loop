@@ -1,117 +1,99 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
-      app
-    >
-      <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-app-bar
-      :clipped-left="clipped"
-      fixed
-      app
-    >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn
-        icon
-        @click.stop="miniVariant = !miniVariant"
-      >
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="clipped = !clipped"
-      >
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn
-        icon
-        @click.stop="fixed = !fixed"
-      >
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
-      <v-toolbar-title v-text="title" />
+    <v-app-bar extended dark flat>
+      <v-toolbar-title>
+        <v-icon>mdi-music-clef-treble</v-icon>
+        Ogg Loop Editor
+      </v-toolbar-title>
       <v-spacer />
-      <v-btn
-        icon
-        @click.stop="rightDrawer = !rightDrawer"
+      <v-dialog
+        v-model="aboutDialog"
+        width="800"
+        overlay-color="cyan lighten-5"
       >
-        <v-icon>mdi-menu</v-icon>
+        <template v-slot:activator="{ on, attrs }">
+          <cmd-btn icon v-bind="attrs" v-on="on">
+            <v-icon color="cyan accent-4" @click.stop="aboutDialog = true">
+              mdi-information-outline
+            </v-icon>
+            <template #tooltip>About</template>
+          </cmd-btn>
+        </template>
+        <about-content />
+      </v-dialog>
+      <v-btn
+        href="https://twitter.com/intent/tweet?hashtags=oggloop&amp;ref_src=twsrc%5Etfw&amp;text=Ogg%20Loop%20Editor&amp;tw_p=tweetbutton&amp;url=https%3A%2F%2Foggloop.vercel.app%2F"
+        target="_blank"
+        icon
+        ><v-icon color="#1DA1F2">mdi-twitter</v-icon>
       </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
-        <Nuxt />
+        <template v-if="isChrome">
+          <nuxt />
+        </template>
+        <template v-else>
+          <div class="screenshot-wrap">
+            <img
+              class="screenshot"
+              src="/oggloop.png"
+              alt="Ogg Loop Editor Screenshot"
+            />
+          </div>
+          <div class="white--text text-body-2 text-center pb-12">
+            Sorry, Ogg Loop Editor is currently only supported on the Google
+            Chrome browser.
+          </div>
+        </template>
       </v-container>
     </v-main>
-    <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-footer
-      :absolute="!fixed"
-      app
-    >
-      <span>&copy; {{ new Date().getFullYear() }}</span>
-    </v-footer>
   </v-app>
 </template>
 
 <script>
+import CmdBtn from '@/components/CmdBtn'
+import AboutContent from '@/components/AboutContent'
+
 export default {
-  data () {
-    return {
-      clipped: false,
-      drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/'
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire'
-        }
-      ],
-      miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js'
-    }
-  }
+  components: {
+    CmdBtn,
+    AboutContent,
+  },
+  data: () => ({
+    aboutDialog: false,
+  }),
+  computed: {
+    isChrome() {
+      return this.$browserDetect.isChrome
+    },
+  },
 }
 </script>
+
+<style>
+#__layout > .theme--light.v-application {
+  background-image: url(/sea.jpg);
+}
+#__layout > .theme--light.v-application .v-application--wrap {
+  backdrop-filter: blur(5px);
+  background: rgba(255, 255, 255, 0.2);
+}
+.theme--dark.v-app-bar.v-toolbar.v-sheet {
+  background-color: transparent !important;
+}
+.v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
+  padding-top: 6px;
+  align-self: flex-start;
+}
+.screenshot-wrap {
+  max-width: 800px;
+  margin: auto;
+}
+.screenshot {
+  width: 100%;
+}
+.v-overlay__scrim.cyan.lighten-5 {
+  backdrop-filter: blur(50px);
+}
+</style>
