@@ -1,20 +1,10 @@
 import colors from 'vuetify/es5/util/colors'
 
 export default {
-  /*
-   ** Nuxt rendering mode
-   ** See https://nuxtjs.org/api/configuration-mode
-   */
-  mode: 'spa',
-  /*
-   ** Nuxt target
-   ** See https://nuxtjs.org/api/configuration-target
-   */
-  target: 'server',
-  /*
-   ** Headers of the page
-   ** See https://nuxtjs.org/api/configuration-head
-   */
+  // Disable server-side rendering: https://go.nuxtjs.dev/ssr-mode
+  ssr: false,
+
+  // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
     title: 'Ogg Loop Editor',
     htmlAttrs: {
@@ -22,6 +12,8 @@ export default {
     },
     meta: [
       { charset: 'utf-8' },
+      { name: 'format-detection', content: 'telephone=no' },
+      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
       {
         hid: 'description',
@@ -55,30 +47,26 @@ export default {
     ],
     link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
   },
+
   env: {
     DISCORD_WEBHOOK:
       'https://discord.com/api/webhooks/795600132229300274/kgSevzKqzXdqBZrCiVCrUWXPNxD4vFzBU7CXXy9qpiFTQfFdriJSvirqqXpDBenvGD1y',
   },
-  /*
-   ** Global CSS
-   */
+
+  // Global CSS: https://go.nuxtjs.dev/config-css
   css: [],
-  /*
-   ** Plugins to load before mounting the App
-   ** https://nuxtjs.org/guide/plugins
-   */
+
+  // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [{ src: '@/plugins/vue-shortkey.js', mode: 'client' }],
-  /*
-   ** Auto import components
-   ** See https://nuxtjs.org/api/configuration-components
-   */
+
+  // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
-  /*
-   ** Nuxt.js dev-modules
-   */
+
+  // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
-    // Doc: https://github.com/nuxt-community/eslint-module
+    // https://go.nuxtjs.dev/eslint
     '@nuxtjs/eslint-module',
+    // https://go.nuxtjs.dev/vuetify
     '@nuxtjs/vuetify',
     'vue-browser-detect-plugin/nuxt',
     [
@@ -88,23 +76,26 @@ export default {
       },
     ],
   ],
-  /*
-   ** Nuxt.js modules
-   */
+
+  // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // Doc: https://axios.nuxtjs.org/usage
+    // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    // https://go.nuxtjs.dev/pwa
     '@nuxtjs/pwa',
   ],
-  /*
-   ** Axios module configuration
-   ** See https://axios.nuxtjs.org/options
-   */
+
+  // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {},
-  /*
-   ** vuetify module configuration
-   ** https://github.com/nuxt-community/vuetify-module
-   */
+
+  // PWA module configuration: https://go.nuxtjs.dev/pwa
+  pwa: {
+    manifest: {
+      lang: 'en',
+    },
+  },
+
+  // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
     theme: {
@@ -121,9 +112,7 @@ export default {
       },
     },
   },
-  /*
-   ** Build configuration
-   ** See https://nuxtjs.org/api/configuration-build/
-   */
+
+  // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {},
 }

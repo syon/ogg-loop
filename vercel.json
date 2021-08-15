@@ -1,15 +1,3 @@
 {
-  "version": 2,
-  "builds": [
-    {
-      "src": "nuxt.config.js",
-      "use": "@nuxtjs/now-builder",
-      "config": {}
-    },
-    { "src": "api/**/*.py", "use": "@now/python" }
-  ],
-  "routes": [
-    { "src": "/api/read", "dest": "/api/read/index.py" },
-    { "src": "/api/write", "dest": "/api/write/index.py" }
-  ]
+  "version": 2
 }
