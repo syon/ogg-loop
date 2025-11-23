@@ -8,30 +8,30 @@
           name="myfile"
           accept="audio/ogg"
           show-size
-          outlined
+          variant="outlined"
           label="Ogg File"
           hide-details
-          style="width: 400px;"
+          style="width: 400px"
           class="mr-4"
         />
         <template v-if="!metaReady">
-          <v-btn depressed type="button" @click="handleScanOgg">
-            <v-icon left>mdi-spotlight-beam</v-icon>
+          <v-btn variant="flat" type="button" @click="handleScanOgg">
+            <v-icon start>mdi-spotlight-beam</v-icon>
             Scan
           </v-btn>
         </template>
         <template v-else>
           <v-menu :close-on-content-click="false" min-width="250">
-            <template #activator="{ on, attrs }">
-              <v-btn v-bind="attrs" v-on="on">
-                <v-icon left>mdi-details</v-icon>
+            <template #activator="{ props }">
+              <v-btn v-bind="props">
+                <v-icon start>mdi-details</v-icon>
                 Meta
               </v-btn>
             </template>
             <v-card>
               <v-card-text v-for="(v, k) in meta" :key="k">
                 <div class="text-caption">{{ k }}</div>
-                <div class="text-body-1 grey--text text--darken-4">{{ v }}</div>
+                <div class="text-body-1 text-grey-darken-4">{{ v }}</div>
               </v-card-text>
             </v-card>
           </v-menu>
@@ -48,22 +48,22 @@
           v-model="formLoopStartSample"
           type="number"
           label="LOOPSTART"
-          outlined
+          variant="outlined"
           hide-details
-          dense
+          density="compact"
           class="mr-4"
-          style="width: 140px;"
+          style="width: 140px"
           @change="syncFormToRegion"
         />
         <v-text-field
           v-model="formLoopLengthSample"
           type="number"
           label="LOOPLENGTH"
-          outlined
+          variant="outlined"
           hide-details
-          dense
+          density="compact"
           class="mr-4"
-          style="width: 140px;"
+          style="width: 140px"
           @change="syncFormToRegion"
         />
         <v-btn type="submit" color="primary">Download</v-btn>
@@ -74,7 +74,7 @@
     <div class="controls my-2">
       <div class="d-flex justify-space-around">
         <div class="xx-nostate">
-          <v-btn-toggle>
+          <v-btn-toggle border divided>
             <cmd-btn :shortkey="['i']" @do="changeZoom('')">
               <v-icon>mdi-magnify</v-icon>
               <template #tooltip>I</template>
@@ -91,7 +91,7 @@
         </div>
         <div>
           <v-icon left>mdi-fast-forward</v-icon>
-          <v-btn-toggle v-model="speedVal" mandatory>
+          <v-btn-toggle v-model="speedVal" mandatory border divided>
             <cmd-btn :shortkey="['g']" :value="0.2" @do="changeSpeed(0.2)">
               0.2
               <template #tooltip>G</template>
@@ -115,7 +115,7 @@
           </v-btn-toggle>
         </div>
         <div class="xx-nostate">
-          <v-btn-toggle>
+          <v-btn-toggle border divided>
             <cmd-btn :shortkey="['shift', 'arrowleft']" @do="handleSkip(-10)">
               <v-icon>mdi-rewind-10</v-icon>
               <template #tooltip>
@@ -143,7 +143,7 @@
           </v-btn-toggle>
         </div>
         <div class="loop-controls xx-nostate">
-          <v-btn-toggle>
+          <v-btn-toggle border divided>
             <cmd-btn :shortkey="['n']" @do="handleRepeat(6)">
               <v-icon class="mr-1">mdi-update</v-icon>
               <span>6</span>
@@ -156,7 +156,7 @@
             </cmd-btn>
           </v-btn-toggle>
         </div>
-        <div class="xx-volume d-flex align-center" style="width: 150px;">
+        <div class="xx-volume d-flex align-center" style="width: 150px">
           <v-slider
             v-model="volumeVal"
             prepend-icon="mdi-volume-high"
@@ -171,10 +171,10 @@
       <div class="d-flex align-center">
         <cmd-btn :shortkey="['space']" @do="playPause">
           <template v-if="!isPlaying">
-            <v-icon v-text="'mdi-play'" />
+            <v-icon>mdi-play</v-icon>
           </template>
           <template v-else>
-            <v-icon v-text="'mdi-pause'" />
+            <v-icon>mdi-pause</v-icon>
           </template>
           <template #tooltip>
             <span>Space</span>
@@ -185,7 +185,7 @@
           class="ml-6"
           hide-details
           label="Loop"
-          style="margin: 0;"
+          style="margin: 0"
           @click="handleChangeLoop"
         />
       </div>
@@ -232,7 +232,7 @@
       </div>
     </div>
 
-    <div class="my-4" style="position: relative;">
+    <div class="my-4" style="position: relative">
       <div id="waveform-timeline"></div>
       <div id="waveform"></div>
       <div id="waveform-minimap"></div>
@@ -244,8 +244,8 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
 import FileDownload from 'js-file-download'
+import { useDropperStore } from '@/stores/dropper'
 import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
 import Ogg from '@/lib/Ogg'
@@ -255,6 +255,12 @@ export default {
   components: {
     DropZone,
     CmdBtn,
+  },
+  setup() {
+    const dropperStore = useDropperStore()
+    return {
+      dropperStore,
+    }
   },
   data() {
     return {
@@ -274,12 +280,18 @@ export default {
     }
   },
   computed: {
-    ...mapGetters({
-      gFile: 'dropper/gFile',
-      gLastLoaded: 'dropper/gLastLoaded',
-      gFileInfo: 'dropper/gFileInfo',
-      gFileBuffer: 'dropper/gFileBuffer',
-    }),
+    gFile() {
+      return this.dropperStore.gFile
+    },
+    gLastLoaded() {
+      return this.dropperStore.gLastLoaded
+    },
+    gFileInfo() {
+      return this.dropperStore.gFileInfo
+    },
+    gFileBuffer() {
+      return this.dropperStore.gFileBuffer
+    },
     currentSample() {
       return Math.round(this.audioprocess * 44100)
     },
@@ -337,9 +349,9 @@ export default {
   methods: {
     async applySampleAudio() {
       const url = `${location.origin}/TropicalBeach.ogg`
-      const m = await this.$axios.$get(url, { responseType: 'blob' })
-      m.name = 'TropicalBeach.ogg'
-      this.$store.dispatch('dropper/load', [m])
+      const blob = await $fetch(url, { responseType: 'blob' })
+      const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
+      await this.dropperStore.load([file])
       this.meta = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
     },
     refresh() {
@@ -355,20 +367,36 @@ export default {
         looplength: this.meta.LOOPLENGTH,
       }
       this.wavesurfer = Surf.create(options)
-      const list = this.wavesurfer.regions.list
-      const [, region] = Object.entries(list)[0]
-      this.region = region
+
+      // Wait for initial region to be created
+      this.wavesurfer.once('decode', () => {
+        this.region = this.wavesurfer.initialRegion
+        this.syncRegionToForm()
+
+        // Inject custom styles into Shadow DOM
+        this.injectShadowStyles()
+
+        // Set up region event listeners
+        if (this.region) {
+          this.region.on('update-end', () => {
+            this.syncRegionToForm()
+          })
+
+          // Handle loop playback
+          if (this.loop) {
+            this.region.on('out', () => {
+              this.wavesurfer.setTime(this.region.start)
+            })
+          }
+        }
+      })
 
       this.wavesurfer.on('audioprocess', (sec) => {
         this.audioprocess = sec
       })
 
-      this.wavesurfer.on('seek', () => {
-        const sec = this.wavesurfer.getCurrentTime()
+      this.wavesurfer.on('seeking', (sec) => {
         this.audioprocess = sec
-        if (sec < region.start || region.end < sec) {
-          region.loop = false
-        }
       })
 
       if (fileBuffer) {
@@ -376,21 +404,6 @@ export default {
       }
 
       this.changeVolume()
-
-      this.wavesurfer.on('region-in', (region) => {
-        if (this.loop) {
-          region.loop = true
-        }
-      })
-      this.wavesurfer.on('region-out', (region) => {
-        region.loop = false
-      })
-      this.wavesurfer.on('ready', () => {
-        this.syncRegionToForm()
-      })
-      this.wavesurfer.on('region-updated', (region) => {
-        this.syncRegionToForm()
-      })
     },
     formatTime(v) {
       let sec = v
@@ -443,15 +456,16 @@ export default {
     syncRegionToForm() {
       this.formLoopStartSample = Math.round(this.region.start * 44100)
       this.formLoopLengthSample = Math.round(
-        (this.region.end - this.region.start) * 44100
+        (this.region.end - this.region.start) * 44100,
       )
     },
     syncFormToRegion() {
+      if (!this.region) return
       const start = Number(this.formLoopStartSample) / 44100
       const end =
         (Number(this.formLoopStartSample) + Number(this.formLoopLengthSample)) /
         44100
-      this.region.update({ start, end })
+      this.region.setOptions({ start, end })
     },
     async handleScanOgg() {
       this.loading = true
@@ -478,6 +492,58 @@ export default {
       }
       this.loading = false
     },
+    injectShadowStyles() {
+      // Find the waveform container
+      const waveformContainer = document.querySelector('#waveform')
+      if (!waveformContainer) return
+
+      // Try finding shadow DOM containers
+      const canvasElements = waveformContainer.querySelectorAll('div')
+      canvasElements.forEach(el => {
+        if (el.shadowRoot) {
+          this.addStylesToShadowRoot(el.shadowRoot)
+        }
+      })
+
+      // Directly target elements with part attribute using partial match (~=)
+      const regionElements = waveformContainer.querySelectorAll('[part~="region"]')
+      regionElements.forEach(el => {
+        el.style.height = '50%'
+        el.style.zIndex = '9'
+      })
+
+      const handleElements = waveformContainer.querySelectorAll('[part~="region-handle"]')
+      handleElements.forEach(el => {
+        el.style.backgroundColor = '#f57f17'
+        el.style.width = '2px'
+      })
+
+      // Add global styles using ::part() and attribute selectors
+      const styleElement = document.createElement('style')
+      styleElement.textContent = `
+        ::part(region) {
+          height: 50% !important;
+          z-index: 9 !important;
+        }
+        ::part(region-handle) {
+          border-color: #f57f17 !important;
+        }
+      `
+      document.head.appendChild(styleElement)
+    },
+    addStylesToShadowRoot(shadowRoot) {
+      const style = document.createElement('style')
+      style.textContent = `
+        ::part(region) {
+          height: 50% !important;
+          z-index: 9 !important;
+        }
+        ::part(region-handle) {
+          border-color: #f57f17 !important;
+        }
+      `
+      shadowRoot.appendChild(style)
+    },
   },
 }
 </script>
@@ -486,7 +552,7 @@ export default {
 body {
   background: #f8f8f8;
 }
-.container {
+.v-container {
   width: 100%;
   max-width: 100%;
   margin: auto;
@@ -503,11 +569,11 @@ body {
 .buttons {
   margin-bottom: 1em;
 }
-region.wavesurfer-region {
+[part="region"] {
   height: 50% !important;
   z-index: 9 !important;
 }
-region .wavesurfer-handle {
+[part="region-handle"] {
   background-color: #f57f17 !important;
   width: 2px !important;
 }
@@ -517,8 +583,7 @@ region .wavesurfer-handle {
 .loopInfo .big {
   font-size: 1.5rem;
 }
-.xx-nostate
-  .v-btn:not(.v-btn--text):not(.v-btn--outlined).v-btn--active:before {
+.xx-nostate .v-btn__overlay {
   opacity: 0 !important;
 }
 </style>

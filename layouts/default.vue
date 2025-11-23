@@ -1,19 +1,15 @@
 <template>
-  <v-app dark>
+  <v-app>
     <v-app-bar extended dark flat>
       <v-toolbar-title>
         <v-icon>mdi-music-clef-treble</v-icon>
         Ogg Loop Editor
       </v-toolbar-title>
       <v-spacer />
-      <v-dialog
-        v-model="aboutDialog"
-        width="800"
-        overlay-color="cyan lighten-5"
-      >
-        <template v-slot:activator="{ on, attrs }">
-          <cmd-btn icon v-bind="attrs" v-on="on">
-            <v-icon color="cyan accent-4" @click.stop="aboutDialog = true">
+      <v-dialog v-model="aboutDialog" width="800">
+        <template #activator="{ props }">
+          <cmd-btn icon v-bind="props">
+            <v-icon color="cyan-accent-4" @click.stop="aboutDialog = true">
               mdi-information-outline
             </v-icon>
             <template #tooltip>About</template>
@@ -25,13 +21,14 @@
         href="https://twitter.com/intent/tweet?hashtags=oggloop&amp;ref_src=twsrc%5Etfw&amp;text=Ogg%20Loop%20Editor&amp;tw_p=tweetbutton&amp;url=https%3A%2F%2Foggloop.vercel.app%2F"
         target="_blank"
         icon
-        ><v-icon color="#1DA1F2">mdi-twitter</v-icon>
+      >
+        <v-icon color="#1DA1F2">mdi-twitter</v-icon>
       </v-btn>
     </v-app-bar>
     <v-main>
       <v-container>
         <template v-if="isChrome">
-          <nuxt />
+          <slot />
         </template>
         <template v-else>
           <div class="screenshot-wrap">
@@ -41,7 +38,7 @@
               alt="Ogg Loop Editor Screenshot"
             />
           </div>
-          <div class="white--text text-body-2 text-center pb-12">
+          <div class="text-white text-body-2 text-center pb-12">
             Sorry, Ogg Loop Editor is currently only supported on the Google
             Chrome browser.
           </div>
@@ -52,6 +49,7 @@
 </template>
 
 <script>
+import { ref, computed } from 'vue'
 import CmdBtn from '@/components/CmdBtn'
 import AboutContent from '@/components/AboutContent'
 
@@ -60,26 +58,35 @@ export default {
     CmdBtn,
     AboutContent,
   },
-  data: () => ({
-    aboutDialog: false,
-  }),
-  computed: {
-    isChrome() {
-      return this.$browserDetect.isChrome
-    },
+  setup() {
+    const aboutDialog = ref(false)
+
+    // Simple Chrome detection
+    const isChrome = computed(() => {
+      if (process.client) {
+        const userAgent = navigator.userAgent.toLowerCase()
+        return userAgent.includes('chrome') && !userAgent.includes('edg')
+      }
+      return true // SSR fallback
+    })
+
+    return {
+      aboutDialog,
+      isChrome,
+    }
   },
 }
 </script>
 
 <style>
-#__layout > .theme--light.v-application {
+.v-application {
   background-image: url(/sea.jpg);
 }
-#__layout > .theme--light.v-application .v-application--wrap {
+.v-application .v-application__wrap {
   backdrop-filter: blur(5px);
   background: rgba(255, 255, 255, 0.2);
 }
-.theme--dark.v-app-bar.v-toolbar.v-sheet {
+.v-app-bar.v-toolbar {
   background-color: transparent !important;
 }
 .v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
@@ -92,8 +99,5 @@ export default {
 }
 .screenshot {
   width: 100%;
-}
-.v-overlay__scrim.cyan.lighten-5 {
-  backdrop-filter: blur(50px);
 }
 </style>
