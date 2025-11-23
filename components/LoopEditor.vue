@@ -4,6 +4,7 @@ import FileDownload from 'js-file-download'
 import { useDropperStore } from '@/stores/dropper'
 import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
+import AudioControls from '@/components/AudioControls'
 import Ogg from '@/lib/Ogg'
 import Surf from '@/lib/Surf'
 
@@ -427,101 +428,14 @@ onMounted(async () => {
     </div>
     <v-divider class="my-6" />
 
-    <div class="controls my-2">
-      <div class="d-flex justify-space-around">
-        <div class="xx-nostate">
-          <v-btn-toggle border divided>
-            <cmd-btn :shortkey="['i']" @do="changeZoom('')">
-              <v-icon>mdi-magnify</v-icon>
-              <template #tooltip>I</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['o']" @do="changeZoom('minus')">
-              <v-icon>mdi-minus</v-icon>
-              <template #tooltip>O</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['p']" @do="changeZoom('plus')">
-              <v-icon>mdi-plus</v-icon>
-              <template #tooltip>P</template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
-        <div>
-          <v-icon left>mdi-fast-forward</v-icon>
-          <v-btn-toggle v-model="speedVal" mandatory border divided>
-            <cmd-btn :shortkey="['g']" :value="0.2" @do="changeSpeed(0.2)">
-              0.2
-              <template #tooltip>G</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['h']" :value="0.5" @do="changeSpeed(0.5)">
-              0.5
-              <template #tooltip>H</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['j']" :value="1.0" @do="changeSpeed(1.0)">
-              1.0
-              <template #tooltip>J</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['k']" :value="1.5" @do="changeSpeed(1.5)">
-              1.5
-              <template #tooltip>K</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['l']" :value="2.0" @do="changeSpeed(2.0)">
-              2.0
-              <template #tooltip>L</template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
-        <div class="xx-nostate">
-          <v-btn-toggle border divided>
-            <cmd-btn :shortkey="['shift', 'arrowleft']" @do="handleSkip(-10)">
-              <v-icon>mdi-rewind-10</v-icon>
-              <template #tooltip>
-                <span>Shift + <v-icon dark small>mdi-arrow-left</v-icon></span>
-              </template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['arrowleft']" @do="handleSkip(-5)">
-              <v-icon>mdi-rewind-5</v-icon>
-              <template #tooltip>
-                <span><v-icon dark small>mdi-arrow-left</v-icon></span>
-              </template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['arrowright']" @do="handleSkip(5)">
-              <v-icon>mdi-fast-forward-5</v-icon>
-              <template #tooltip>
-                <span><v-icon dark small>mdi-arrow-right</v-icon></span>
-              </template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['shift', 'arrowright']" @do="handleSkip(10)">
-              <v-icon>mdi-fast-forward-10</v-icon>
-              <template #tooltip>
-                <span>Shift + <v-icon dark small>mdi-arrow-right</v-icon></span>
-              </template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
-        <div class="loop-controls xx-nostate">
-          <v-btn-toggle border divided>
-            <cmd-btn :shortkey="['n']" @do="handleRepeat(6)">
-              <v-icon class="mr-1">mdi-update</v-icon>
-              <span>6</span>
-              <template #tooltip>N</template>
-            </cmd-btn>
-            <cmd-btn :shortkey="['m']" @do="handleRepeat(3)">
-              <v-icon class="mr-1">mdi-update</v-icon>
-              <span>3</span>
-              <template #tooltip>M</template>
-            </cmd-btn>
-          </v-btn-toggle>
-        </div>
-        <div class="xx-volume d-flex align-center" style="width: 150px">
-          <v-slider
-            v-model="volumeVal"
-            prepend-icon="mdi-volume-high"
-            hide-details
-            @change="changeVolume"
-          />
-        </div>
-      </div>
-    </div>
+    <audio-controls
+      v-model:speed-val="speedVal"
+      v-model:volume-val="volumeVal"
+      @change-zoom="changeZoom"
+      @change-speed="changeSpeed"
+      @handle-skip="handleSkip"
+      @handle-repeat="handleRepeat"
+    />
 
     <div class="d-flex align-center justify-center my-6">
       <div class="d-flex align-center">
@@ -614,9 +528,6 @@ body {
   width: 100%;
   margin-top: -64px;
 }
-.controls {
-  margin-bottom: 1em;
-}
 .buttons {
   margin-bottom: 1em;
 }
@@ -625,8 +536,5 @@ body {
 }
 .loopInfo .big {
   font-size: 1.5rem;
-}
-.xx-nostate .v-btn__overlay {
-  opacity: 0 !important;
 }
 </style>
