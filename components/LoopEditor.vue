@@ -275,6 +275,9 @@ export default {
       metaReady: false,
       loading: false,
       loop: true,
+      regionOutListener: null,
+      loopAudioprocessListener: null,
+      loopAnimationFrame: null,
       formLoopStartSample: null,
       formLoopLengthSample: null,
     }
@@ -351,8 +354,9 @@ export default {
       const url = `${location.origin}/TropicalBeach.ogg`
       const blob = await $fetch(url, { responseType: 'blob' })
       const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
-      await this.dropperStore.load([file])
       this.meta = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
+      await this.dropperStore.load([file])
+      this.metaReady = true
     },
     refresh() {
       this.myfile = this.gFile
@@ -382,12 +386,8 @@ export default {
             this.syncRegionToForm()
           })
 
-          // Handle loop playback
-          if (this.loop) {
-            this.region.on('out', () => {
-              this.wavesurfer.setTime(this.region.start)
-            })
-          }
+          // Set up loop playback handler
+          this.setupLoopHandler()
         }
       })
 
@@ -451,7 +451,62 @@ export default {
       return Math.round(sec * 44100)
     },
     handleChangeLoop() {
-      this.region.loop = false
+      // Re-setup loop handler when loop toggle changes
+      this.setupLoopHandler()
+    },
+    setupLoopHandler() {
+      if (!this.region || !this.wavesurfer) return
+
+      // Remove existing listeners
+      if (this.regionOutListener) {
+        this.region.un('out', this.regionOutListener)
+        this.regionOutListener = null
+      }
+      if (this.loopAudioprocessListener) {
+        this.wavesurfer.un('audioprocess', this.loopAudioprocessListener)
+        this.loopAudioprocessListener = null
+      }
+      if (this.loopAnimationFrame) {
+        cancelAnimationFrame(this.loopAnimationFrame)
+        this.loopAnimationFrame = null
+      }
+
+      if (this.loop) {
+        // Official WaveSurfer.js v7 region looping approach
+        this.regionOutListener = () => {
+          this.region.play()
+        }
+        this.region.on('out', this.regionOutListener)
+
+        // Use requestAnimationFrame for high-precision loop monitoring
+        // This provides much better timing accuracy than audioprocess
+        const checkLoop = () => {
+          if (!this.wavesurfer || !this.wavesurfer.isPlaying() || !this.loop) {
+            return
+          }
+
+          const currentTime = this.wavesurfer.getCurrentTime()
+
+          // If we've reached the region end, jump back to start
+          if (currentTime >= this.region.end) {
+            this.wavesurfer.setTime(this.region.start)
+          }
+
+          // Continue checking
+          this.loopAnimationFrame = requestAnimationFrame(checkLoop)
+        }
+
+        // Store the animation frame ID for cleanup
+        this.loopAnimationFrame = requestAnimationFrame(checkLoop)
+
+        // Also keep audioprocess as backup
+        this.loopAudioprocessListener = (currentTime) => {
+          if (this.wavesurfer.isPlaying() && currentTime >= this.region.end) {
+            this.wavesurfer.setTime(this.region.start)
+          }
+        }
+        this.wavesurfer.on('audioprocess', this.loopAudioprocessListener)
+      }
     },
     syncRegionToForm() {
       this.formLoopStartSample = Math.round(this.region.start * 44100)
@@ -499,21 +554,24 @@ export default {
 
       // Try finding shadow DOM containers
       const canvasElements = waveformContainer.querySelectorAll('div')
-      canvasElements.forEach(el => {
+      canvasElements.forEach((el) => {
         if (el.shadowRoot) {
           this.addStylesToShadowRoot(el.shadowRoot)
         }
       })
 
       // Directly target elements with part attribute using partial match (~=)
-      const regionElements = waveformContainer.querySelectorAll('[part~="region"]')
-      regionElements.forEach(el => {
+      const regionElements =
+        waveformContainer.querySelectorAll('[part~="region"]')
+      regionElements.forEach((el) => {
         el.style.height = '50%'
         el.style.zIndex = '9'
       })
 
-      const handleElements = waveformContainer.querySelectorAll('[part~="region-handle"]')
-      handleElements.forEach(el => {
+      const handleElements = waveformContainer.querySelectorAll(
+        '[part~="region-handle"]',
+      )
+      handleElements.forEach((el) => {
         el.style.backgroundColor = '#f57f17'
         el.style.width = '2px'
       })
@@ -568,14 +626,6 @@ body {
 }
 .buttons {
   margin-bottom: 1em;
-}
-[part="region"] {
-  height: 50% !important;
-  z-index: 9 !important;
-}
-[part="region-handle"] {
-  background-color: #f57f17 !important;
-  width: 2px !important;
 }
 .loopInfo > div {
   min-width: 150px;
