@@ -1,3 +1,359 @@
+<script setup>
+import { ref, computed, watch, onMounted } from 'vue'
+import FileDownload from 'js-file-download'
+import { useDropperStore } from '@/stores/dropper'
+import DropZone from '@/components/DropZone'
+import CmdBtn from '@/components/CmdBtn'
+import Ogg from '@/lib/Ogg'
+import Surf from '@/lib/Surf'
+
+const dropperStore = useDropperStore()
+
+// Reactive state
+const myfile = ref(null)
+const audioprocess = ref(0)
+const zoomVal = ref(0)
+const volumeVal = ref(50)
+const speedVal = ref(1.0)
+const wavesurfer = ref(null)
+const region = ref({})
+const meta = ref({})
+const metaReady = ref(false)
+const loading = ref(false)
+const loop = ref(true)
+const regionOutListener = ref(null)
+const loopAudioprocessListener = ref(null)
+const loopAnimationFrame = ref(null)
+const formLoopStartSample = ref(null)
+const formLoopLengthSample = ref(null)
+
+// Computed properties
+const gFile = computed(() => dropperStore.gFile)
+const gLastLoaded = computed(() => dropperStore.gLastLoaded)
+const gFileInfo = computed(() => dropperStore.gFileInfo)
+const gFileBuffer = computed(() => dropperStore.gFileBuffer)
+
+const currentSample = computed(() => Math.round(audioprocess.value * 44100))
+const currentTime = computed(() => formatTime(audioprocess.value))
+
+const sampleStart = computed(() => {
+  if (region.value) {
+    const crr = region.value.start
+    return Math.round(crr * 44100)
+  }
+  return ''
+})
+
+const sampleStartTime = computed(() => {
+  if (region.value) {
+    return formatTime(region.value.start)
+  }
+  return ''
+})
+
+const sampleEnd = computed(() => {
+  if (region.value) {
+    const crr = region.value.end
+    return Math.round(crr * 44100)
+  }
+  return ''
+})
+
+const sampleEndTime = computed(() => {
+  if (region.value) {
+    return formatTime(region.value.end)
+  }
+  return ''
+})
+
+const looplengthSample = computed(() => sampleEnd.value - sampleStart.value)
+const looplengthTime = computed(() =>
+  formatTime(looplengthSample.value / 44100),
+)
+const isPlaying = computed(
+  () => wavesurfer.value && wavesurfer.value.isPlaying(),
+)
+
+// Watchers
+watch(myfile, () => {
+  metaReady.value = false
+})
+
+watch(gLastLoaded, () => {
+  metaReady.value = false
+  refresh()
+})
+
+// Methods
+const formatTime = (v) => {
+  let sec = v
+  if (!v) sec = 0
+  return new Date(sec * 1000).toISOString().slice(14, -1)
+}
+
+const applySampleAudio = async () => {
+  const url = `${location.origin}/TropicalBeach.ogg`
+  const blob = await $fetch(url, { responseType: 'blob' })
+  const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
+  meta.value = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
+  await dropperStore.load([file])
+  metaReady.value = true
+}
+
+const refresh = () => {
+  myfile.value = gFile.value
+  load(gFileBuffer.value)
+}
+
+const load = (fileBuffer) => {
+  if (wavesurfer.value) {
+    wavesurfer.value.destroy()
+  }
+  const options = {
+    loopstart: meta.value.LOOPSTART,
+    looplength: meta.value.LOOPLENGTH,
+  }
+  wavesurfer.value = Surf.create(options)
+
+  // Wait for initial region to be created
+  wavesurfer.value.once('decode', () => {
+    region.value = wavesurfer.value.initialRegion
+    syncRegionToForm()
+
+    // Inject custom styles into Shadow DOM
+    injectShadowStyles()
+
+    // Set up region event listeners
+    if (region.value) {
+      region.value.on('update-end', () => {
+        syncRegionToForm()
+      })
+
+      // Set up loop playback handler
+      setupLoopHandler()
+    }
+  })
+
+  wavesurfer.value.on('audioprocess', (sec) => {
+    audioprocess.value = sec
+  })
+
+  wavesurfer.value.on('seeking', (sec) => {
+    audioprocess.value = sec
+  })
+
+  if (fileBuffer) {
+    wavesurfer.value.load(fileBuffer)
+  }
+
+  changeVolume()
+}
+
+const playPause = () => {
+  wavesurfer.value.playPause()
+}
+
+const handleSkip = (offset) => {
+  wavesurfer.value.skip(offset)
+}
+
+const handleRepeat = (offset) => {
+  const sec = region.value.end - offset
+  wavesurfer.value.play(sec)
+}
+
+const changeZoom = (sub) => {
+  switch (sub) {
+    case 'minus':
+      zoomVal.value = zoomVal.value <= 20 ? 0 : zoomVal.value - 20
+      wavesurfer.value.zoom(Number(zoomVal.value))
+      break
+    case 'plus':
+      zoomVal.value += 20
+      wavesurfer.value.zoom(Number(zoomVal.value))
+      break
+    default:
+      zoomVal.value = 0
+      wavesurfer.value.zoom(0)
+      break
+  }
+}
+
+const changeVolume = () => {
+  wavesurfer.value.setVolume(Number(volumeVal.value / 100))
+}
+
+const changeSpeed = (v) => {
+  speedVal.value = v
+  wavesurfer.value.setPlaybackRate(Number(v))
+}
+
+const handleChangeLoop = () => {
+  // Re-setup loop handler when loop toggle changes
+  setupLoopHandler()
+}
+
+const setupLoopHandler = () => {
+  if (!region.value || !wavesurfer.value) return
+
+  // Remove existing listeners
+  if (regionOutListener.value) {
+    region.value.un('out', regionOutListener.value)
+    regionOutListener.value = null
+  }
+  if (loopAudioprocessListener.value) {
+    wavesurfer.value.un('audioprocess', loopAudioprocessListener.value)
+    loopAudioprocessListener.value = null
+  }
+  if (loopAnimationFrame.value) {
+    cancelAnimationFrame(loopAnimationFrame.value)
+    loopAnimationFrame.value = null
+  }
+
+  if (loop.value) {
+    // Official WaveSurfer.js v7 region looping approach
+    regionOutListener.value = () => {
+      region.value.play()
+    }
+    region.value.on('out', regionOutListener.value)
+
+    // Use requestAnimationFrame for high-precision loop monitoring
+    // This provides much better timing accuracy than audioprocess
+    const checkLoop = () => {
+      if (!wavesurfer.value || !wavesurfer.value.isPlaying() || !loop.value) {
+        return
+      }
+
+      const currentTime = wavesurfer.value.getCurrentTime()
+
+      // If we've reached the region end, jump back to start
+      if (currentTime >= region.value.end) {
+        wavesurfer.value.setTime(region.value.start)
+      }
+
+      // Continue checking
+      loopAnimationFrame.value = requestAnimationFrame(checkLoop)
+    }
+
+    // Store the animation frame ID for cleanup
+    loopAnimationFrame.value = requestAnimationFrame(checkLoop)
+
+    // Also keep audioprocess as backup
+    loopAudioprocessListener.value = (currentTime) => {
+      if (wavesurfer.value.isPlaying() && currentTime >= region.value.end) {
+        wavesurfer.value.setTime(region.value.start)
+      }
+    }
+    wavesurfer.value.on('audioprocess', loopAudioprocessListener.value)
+  }
+}
+
+const syncRegionToForm = () => {
+  formLoopStartSample.value = Math.round(region.value.start * 44100)
+  formLoopLengthSample.value = Math.round(
+    (region.value.end - region.value.start) * 44100,
+  )
+}
+
+const syncFormToRegion = () => {
+  if (!region.value) return
+  const start = Number(formLoopStartSample.value) / 44100
+  const end =
+    (Number(formLoopStartSample.value) + Number(formLoopLengthSample.value)) /
+    44100
+  region.value.setOptions({ start, end })
+}
+
+const handleScanOgg = async () => {
+  loading.value = true
+  try {
+    meta.value = await Ogg.scan(myfile.value)
+  } catch (e) {
+    alert('Scan Error.')
+  }
+  refresh()
+  metaReady.value = true
+  loading.value = false
+}
+
+const handleSubmit = async () => {
+  loading.value = true
+  try {
+    const data = await Ogg.write({
+      myfile: myfile.value,
+      loopstart: formLoopStartSample.value,
+      looplength: formLoopLengthSample.value,
+    })
+    const filename = `${gFileInfo.value.name.replace('.ogg', '')}_(Loop).ogg`
+    FileDownload(data, filename)
+  } catch (e) {
+    alert('Write Error.')
+  }
+  loading.value = false
+}
+
+const injectShadowStyles = () => {
+  // Find the waveform container
+  const waveformContainer = document.querySelector('#waveform')
+  if (!waveformContainer) return
+
+  // Try finding shadow DOM containers
+  const canvasElements = waveformContainer.querySelectorAll('div')
+  canvasElements.forEach((el) => {
+    if (el.shadowRoot) {
+      addStylesToShadowRoot(el.shadowRoot)
+    }
+  })
+
+  // Directly target elements with part attribute using partial match (~=)
+  const regionElements = waveformContainer.querySelectorAll('[part~="region"]')
+  regionElements.forEach((el) => {
+    el.style.height = '50%'
+    el.style.zIndex = '9'
+  })
+
+  const handleElements = waveformContainer.querySelectorAll(
+    '[part~="region-handle"]',
+  )
+  handleElements.forEach((el) => {
+    el.style.backgroundColor = '#f57f17'
+    el.style.width = '2px'
+  })
+
+  // Add global styles using ::part() and attribute selectors
+  const styleElement = document.createElement('style')
+  styleElement.textContent = `
+    ::part(region) {
+      height: 50% !important;
+      z-index: 9 !important;
+    }
+    ::part(region-handle) {
+      border-color: #f57f17 !important;
+    }
+  `
+  document.head.appendChild(styleElement)
+}
+
+const addStylesToShadowRoot = (shadowRoot) => {
+  const style = document.createElement('style')
+  style.textContent = `
+    ::part(region) {
+      height: 50% !important;
+      z-index: 9 !important;
+    }
+    ::part(region-handle) {
+      border-color: #f57f17 !important;
+    }
+  `
+  shadowRoot.appendChild(style)
+}
+
+// Lifecycle
+onMounted(async () => {
+  await applySampleAudio()
+})
+</script>
+
 <template>
   <v-card class="LoopEditor pa-8" min-height="85vh">
     <drop-zone />
@@ -242,369 +598,6 @@
     </v-overlay>
   </v-card>
 </template>
-
-<script>
-import FileDownload from 'js-file-download'
-import { useDropperStore } from '@/stores/dropper'
-import DropZone from '@/components/DropZone'
-import CmdBtn from '@/components/CmdBtn'
-import Ogg from '@/lib/Ogg'
-import Surf from '@/lib/Surf'
-
-export default {
-  components: {
-    DropZone,
-    CmdBtn,
-  },
-  setup() {
-    const dropperStore = useDropperStore()
-    return {
-      dropperStore,
-    }
-  },
-  data() {
-    return {
-      myfile: null,
-      audioprocess: 0,
-      zoomVal: 0,
-      volumeVal: 50,
-      speedVal: 1.0,
-      wavesurfer: null,
-      region: {},
-      meta: {},
-      metaReady: false,
-      loading: false,
-      loop: true,
-      regionOutListener: null,
-      loopAudioprocessListener: null,
-      loopAnimationFrame: null,
-      formLoopStartSample: null,
-      formLoopLengthSample: null,
-    }
-  },
-  computed: {
-    gFile() {
-      return this.dropperStore.gFile
-    },
-    gLastLoaded() {
-      return this.dropperStore.gLastLoaded
-    },
-    gFileInfo() {
-      return this.dropperStore.gFileInfo
-    },
-    gFileBuffer() {
-      return this.dropperStore.gFileBuffer
-    },
-    currentSample() {
-      return Math.round(this.audioprocess * 44100)
-    },
-    currentTime() {
-      return this.formatTime(this.audioprocess)
-    },
-    sampleStart() {
-      if (this.region) {
-        const crr = this.region.start
-        return Math.round(crr * 44100)
-      }
-      return ''
-    },
-    sampleStartTime() {
-      if (this.region) {
-        return this.formatTime(this.region.start)
-      }
-      return ''
-    },
-    sampleEnd() {
-      if (this.region) {
-        const crr = this.region.end
-        return Math.round(crr * 44100)
-      }
-      return ''
-    },
-    sampleEndTime() {
-      if (this.region) {
-        return this.formatTime(this.region.end)
-      }
-      return ''
-    },
-    looplengthSample() {
-      return this.sampleEnd - this.sampleStart
-    },
-    looplengthTime() {
-      return this.formatTime(this.looplengthSample / 44100)
-    },
-    isPlaying() {
-      return this.wavesurfer && this.wavesurfer.isPlaying()
-    },
-  },
-  watch: {
-    myfile() {
-      this.metaReady = false
-    },
-    gLastLoaded() {
-      this.metaReady = false
-      this.refresh()
-    },
-  },
-  async mounted() {
-    await this.applySampleAudio()
-  },
-  methods: {
-    async applySampleAudio() {
-      const url = `${location.origin}/TropicalBeach.ogg`
-      const blob = await $fetch(url, { responseType: 'blob' })
-      const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
-      this.meta = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
-      await this.dropperStore.load([file])
-      this.metaReady = true
-    },
-    refresh() {
-      this.myfile = this.gFile
-      this.load(this.gFileBuffer)
-    },
-    load(fileBuffer) {
-      if (this.wavesurfer) {
-        this.wavesurfer.destroy()
-      }
-      const options = {
-        loopstart: this.meta.LOOPSTART,
-        looplength: this.meta.LOOPLENGTH,
-      }
-      this.wavesurfer = Surf.create(options)
-
-      // Wait for initial region to be created
-      this.wavesurfer.once('decode', () => {
-        this.region = this.wavesurfer.initialRegion
-        this.syncRegionToForm()
-
-        // Inject custom styles into Shadow DOM
-        this.injectShadowStyles()
-
-        // Set up region event listeners
-        if (this.region) {
-          this.region.on('update-end', () => {
-            this.syncRegionToForm()
-          })
-
-          // Set up loop playback handler
-          this.setupLoopHandler()
-        }
-      })
-
-      this.wavesurfer.on('audioprocess', (sec) => {
-        this.audioprocess = sec
-      })
-
-      this.wavesurfer.on('seeking', (sec) => {
-        this.audioprocess = sec
-      })
-
-      if (fileBuffer) {
-        this.wavesurfer.load(fileBuffer)
-      }
-
-      this.changeVolume()
-    },
-    formatTime(v) {
-      let sec = v
-      if (!v) sec = 0
-      return new Date(sec * 1000).toISOString().slice(14, -1)
-    },
-    playPause() {
-      this.wavesurfer.playPause()
-    },
-    handleSkip(offset) {
-      this.wavesurfer.skip(offset)
-    },
-    handleRepeat(offset) {
-      const sec = this.region.end - offset
-      this.wavesurfer.play(sec)
-    },
-    resetZoom() {
-      this.zoomVal = 0
-      this.wavesurfer.zoom(0)
-    },
-    changeZoom(sub) {
-      switch (sub) {
-        case 'minus':
-          this.zoomVal = this.zoomVal <= 20 ? 0 : this.zoomVal - 20
-          this.wavesurfer.zoom(Number(this.zoomVal))
-          break
-        case 'plus':
-          this.zoomVal += 20
-          this.wavesurfer.zoom(Number(this.zoomVal))
-          break
-        default:
-          this.zoomVal = 0
-          this.wavesurfer.zoom(0)
-          break
-      }
-    },
-    changeVolume() {
-      this.wavesurfer.setVolume(Number(this.volumeVal / 100))
-    },
-    changeSpeed(v) {
-      this.speedVal = v
-      this.wavesurfer.setPlaybackRate(Number(v))
-    },
-    calcSample(sec) {
-      return Math.round(sec * 44100)
-    },
-    handleChangeLoop() {
-      // Re-setup loop handler when loop toggle changes
-      this.setupLoopHandler()
-    },
-    setupLoopHandler() {
-      if (!this.region || !this.wavesurfer) return
-
-      // Remove existing listeners
-      if (this.regionOutListener) {
-        this.region.un('out', this.regionOutListener)
-        this.regionOutListener = null
-      }
-      if (this.loopAudioprocessListener) {
-        this.wavesurfer.un('audioprocess', this.loopAudioprocessListener)
-        this.loopAudioprocessListener = null
-      }
-      if (this.loopAnimationFrame) {
-        cancelAnimationFrame(this.loopAnimationFrame)
-        this.loopAnimationFrame = null
-      }
-
-      if (this.loop) {
-        // Official WaveSurfer.js v7 region looping approach
-        this.regionOutListener = () => {
-          this.region.play()
-        }
-        this.region.on('out', this.regionOutListener)
-
-        // Use requestAnimationFrame for high-precision loop monitoring
-        // This provides much better timing accuracy than audioprocess
-        const checkLoop = () => {
-          if (!this.wavesurfer || !this.wavesurfer.isPlaying() || !this.loop) {
-            return
-          }
-
-          const currentTime = this.wavesurfer.getCurrentTime()
-
-          // If we've reached the region end, jump back to start
-          if (currentTime >= this.region.end) {
-            this.wavesurfer.setTime(this.region.start)
-          }
-
-          // Continue checking
-          this.loopAnimationFrame = requestAnimationFrame(checkLoop)
-        }
-
-        // Store the animation frame ID for cleanup
-        this.loopAnimationFrame = requestAnimationFrame(checkLoop)
-
-        // Also keep audioprocess as backup
-        this.loopAudioprocessListener = (currentTime) => {
-          if (this.wavesurfer.isPlaying() && currentTime >= this.region.end) {
-            this.wavesurfer.setTime(this.region.start)
-          }
-        }
-        this.wavesurfer.on('audioprocess', this.loopAudioprocessListener)
-      }
-    },
-    syncRegionToForm() {
-      this.formLoopStartSample = Math.round(this.region.start * 44100)
-      this.formLoopLengthSample = Math.round(
-        (this.region.end - this.region.start) * 44100,
-      )
-    },
-    syncFormToRegion() {
-      if (!this.region) return
-      const start = Number(this.formLoopStartSample) / 44100
-      const end =
-        (Number(this.formLoopStartSample) + Number(this.formLoopLengthSample)) /
-        44100
-      this.region.setOptions({ start, end })
-    },
-    async handleScanOgg() {
-      this.loading = true
-      try {
-        this.meta = await Ogg.scan(this.myfile)
-      } catch (e) {
-        alert('Scan Error.')
-      }
-      this.refresh()
-      this.metaReady = true
-      this.loading = false
-    },
-    async handleSubmit() {
-      this.loading = true
-      try {
-        const myfile = this.myfile
-        const loopstart = this.formLoopStartSample
-        const looplength = this.formLoopLengthSample
-        const data = await Ogg.write({ myfile, loopstart, looplength })
-        const filename = `${this.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
-        FileDownload(data, filename)
-      } catch (e) {
-        alert('Write Error.')
-      }
-      this.loading = false
-    },
-    injectShadowStyles() {
-      // Find the waveform container
-      const waveformContainer = document.querySelector('#waveform')
-      if (!waveformContainer) return
-
-      // Try finding shadow DOM containers
-      const canvasElements = waveformContainer.querySelectorAll('div')
-      canvasElements.forEach((el) => {
-        if (el.shadowRoot) {
-          this.addStylesToShadowRoot(el.shadowRoot)
-        }
-      })
-
-      // Directly target elements with part attribute using partial match (~=)
-      const regionElements =
-        waveformContainer.querySelectorAll('[part~="region"]')
-      regionElements.forEach((el) => {
-        el.style.height = '50%'
-        el.style.zIndex = '9'
-      })
-
-      const handleElements = waveformContainer.querySelectorAll(
-        '[part~="region-handle"]',
-      )
-      handleElements.forEach((el) => {
-        el.style.backgroundColor = '#f57f17'
-        el.style.width = '2px'
-      })
-
-      // Add global styles using ::part() and attribute selectors
-      const styleElement = document.createElement('style')
-      styleElement.textContent = `
-        ::part(region) {
-          height: 50% !important;
-          z-index: 9 !important;
-        }
-        ::part(region-handle) {
-          border-color: #f57f17 !important;
-        }
-      `
-      document.head.appendChild(styleElement)
-    },
-    addStylesToShadowRoot(shadowRoot) {
-      const style = document.createElement('style')
-      style.textContent = `
-        ::part(region) {
-          height: 50% !important;
-          z-index: 9 !important;
-        }
-        ::part(region-handle) {
-          border-color: #f57f17 !important;
-        }
-      `
-      shadowRoot.appendChild(style)
-    },
-  },
-}
-</script>
 
 <style>
 body {
