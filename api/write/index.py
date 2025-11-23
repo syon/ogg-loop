@@ -25,4 +25,4 @@ def index(path=""):
         ogg.save()
         print(ogg)
         filename = 'loop.ogg'
-        return send_file(tmp.name, mimetype='audio/ogg', as_attachment=True, attachment_filename=filename)
+        return send_file(tmp.name, mimetype='audio/ogg', as_attachment=True, download_name=filename)

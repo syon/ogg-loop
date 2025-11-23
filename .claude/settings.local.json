@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(pip install:*)",
+      "Bash(vercel dev)",
+      "Bash(vercel dev:*)",
+      "Bash(NODE_OPTIONS=--openssl-legacy-provider vercel dev:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(NODE_OPTIONS=--openssl-legacy-provider npm run dev:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

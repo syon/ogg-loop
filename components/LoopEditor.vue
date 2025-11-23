@@ -15,14 +15,14 @@
           class="mr-4"
         />
         <template v-if="!metaReady">
-          <v-btn depressed @click="handleScanOgg">
+          <v-btn depressed type="button" @click="handleScanOgg">
             <v-icon left>mdi-spotlight-beam</v-icon>
             Scan
           </v-btn>
         </template>
         <template v-else>
           <v-menu :close-on-content-click="false" min-width="250">
-            <template v-slot:activator="{ on, attrs }">
+            <template #activator="{ on, attrs }">
               <v-btn v-bind="attrs" v-on="on">
                 <v-icon left>mdi-details</v-icon>
                 Meta
@@ -323,6 +323,9 @@ export default {
     },
   },
   watch: {
+    myfile() {
+      this.metaReady = false
+    },
     gLastLoaded() {
       this.metaReady = false
       this.refresh()

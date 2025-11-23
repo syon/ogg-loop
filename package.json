@@ -2,25 +2,27 @@
   "name": "ogg-loop",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
-    "dev": "nuxt",
-    "build": "nuxt build",
-    "start": "nuxt start",
-    "generate": "nuxt generate",
-    "lint:js": "eslint --ext \".js,.vue\" --ignore-path .gitignore .",
-    "lint": "npm run lint:js"
+    "dev": "npm run dev:nuxt & npm run dev:api",
+    "dev:nuxt": "NODE_OPTIONS=--openssl-legacy-provider nuxt",
+    "dev:api": "venv/bin/python3 api/dev_server.py",
+    "vercel": "echo 'WARNING: This command is unstable with Nuxt 2.'"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.13.6",
     "@nuxtjs/google-analytics": "^2.3.0",
+    "@nuxtjs/proxy": "^2.1.0",
     "@nuxtjs/pwa": "^3.3.5",
     "core-js": "^3.15.1",
-    "nuxt": "^2.15.7",
     "js-file-download": "^0.4.12",
-    "vuetify": "^2.5.5",
+    "nuxt": "^2.18.1",
     "vue-browser-detect-plugin": "^0.1.13",
     "vue-full-screen-file-drop": "^2.0.0",
     "vue-shortkey": "^3.1.7",
+    "vuetify": "^2.6.13",
     "wavesurfer.js": "^4.0.1"
   },
   "devDependencies": {
@@ -34,5 +36,9 @@
     "eslint-plugin-nuxt": "^2.0.0",
     "eslint-plugin-vue": "^7.12.1",
     "prettier": "^2.3.2"
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true
   }
 }
