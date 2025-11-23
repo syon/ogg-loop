@@ -20,8 +20,21 @@ Ogg Loop Editor is a web-based tool for editing loop metadata in .ogg audio file
 # Install dependencies
 npm install
 
-# Development server with hot reload at localhost:3000
+# Set up Python virtual environment (required for API development)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install flask mutagen
+
+# Development server (runs both frontend and backend)
 npm run dev
+# This starts:
+#   - Nuxt frontend at localhost:3000 (dev:nuxt)
+#   - Flask API server at localhost:3001 (dev:api)
+# The frontend proxies /api/* requests to the backend
+
+# Run frontend or backend separately
+npm run dev:nuxt    # Frontend only (requires NODE_OPTIONS=--openssl-legacy-provider)
+npm run dev:api     # Backend only (uses venv/bin/python3 api/dev_server.py)
 
 # Linting
 npm run lint        # Run all linters
@@ -85,12 +98,20 @@ npm run generate
 - **Conversion:** `samples = seconds * 44100`
 - **Metadata Keys:** LOOPSTART (sample position), LOOPLENGTH (sample count)
 
-### Serverless API Structure
+### Development vs Production API
 
-The `/api` directory contains Python Flask serverless functions deployed to Vercel:
-- Each subdirectory (read/, write/) contains an `index.py` that defines the handler
+**Local Development:**
+- [api/dev_server.py](api/dev_server.py) - Flask development server running on port 3001
+- Loads `/api/read` and `/api/write` endpoints from their respective index.py files
+- Nuxt proxy (nuxt.config.js) forwards `/api/*` requests from localhost:3000 to localhost:3001
+- Must run in Python virtual environment with `venv/bin/python3`
+
+**Production (Vercel):**
+- Each `/api` subdirectory (read/, write/) deploys as a separate serverless function
+- Each contains an `index.py` that defines the handler (Flask app)
 - Functions are stateless and use temporary files for processing
-- Dependencies managed via Vercel's Python runtime (mutagen, Flask)
+- Dependencies: mutagen (OGG metadata), Flask (HTTP handling)
+- Configured in vercel.json with `@vercel/python` builder
 
 ### UI/UX Features
 
@@ -107,9 +128,12 @@ The `/api` directory contains Python Flask serverless functions deployed to Verc
 - Form inputs for precise sample-level control
 - Auto-sync between visual region and form values
 
-### Notes
+### Development Notes
 
-- The app loads a sample audio file (TropicalBeach.ogg) on mount for demo purposes
-- Discord webhook URL is exposed in nuxt.config.js (consider moving to env vars)
-- Vuex store's `readAsArrayBuffer` function actually uses `readAsDataURL` - naming inconsistency
-- No automated tests are present in the project
+- **Sample File:** The app auto-loads TropicalBeach.ogg on mount for demo purposes
+- **Discord Analytics:** Webhook URL is exposed in nuxt.config.js (consider moving to env vars)
+- **Naming Inconsistency:** [store/dropper.js](store/dropper.js) function `readAsArrayBuffer` actually uses `readAsDataURL`
+- **No Tests:** No automated tests are present in the project
+- **Node Version:** Requires Node.js >= 22.0.0 (see package.json engines)
+- **OpenSSL Fix:** Frontend dev server requires `NODE_OPTIONS=--openssl-legacy-provider` for compatibility
+- **Git Branches:** Development on `nuxt3` branch, PRs merge to `master`
