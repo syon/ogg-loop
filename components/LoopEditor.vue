@@ -5,6 +5,7 @@ import { useDropperStore } from '@/stores/dropper'
 import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
 import AudioControls from '@/components/AudioControls'
+import LoopInfo from '@/components/LoopInfo'
 import Ogg from '@/lib/Ogg'
 import Surf from '@/lib/Surf'
 
@@ -462,44 +463,16 @@ onMounted(async () => {
 
       <v-divider vertical class="mx-8 my-4" />
 
-      <div class="loopInfo d-flex">
-        <v-card flat>
-          <v-card-subtitle class="pb-2">Current</v-card-subtitle>
-          <v-card-text>
-            <div class="big grey--text text--darken-3">
-              {{ currentTime }}
-            </div>
-            <div class="pt-1 text-subtitle-1">{{ currentSample }}</div>
-          </v-card-text>
-        </v-card>
-        <v-card flat>
-          <v-card-subtitle class="pb-2">Loop start</v-card-subtitle>
-          <v-card-text>
-            <div class="big grey--text text--darken-3">
-              {{ sampleStartTime }}
-            </div>
-            <div class="pt-1 text-subtitle-1">{{ sampleStart }}</div>
-          </v-card-text>
-        </v-card>
-        <v-card flat>
-          <v-card-subtitle class="pb-2">Loop length</v-card-subtitle>
-          <v-card-text>
-            <div class="big grey--text text--darken-3">
-              {{ looplengthTime }}
-            </div>
-            <div class="pt-1 text-subtitle-1">{{ looplengthSample }}</div>
-          </v-card-text>
-        </v-card>
-        <v-card flat>
-          <v-card-subtitle class="pb-2">Loop end</v-card-subtitle>
-          <v-card-text>
-            <div class="big grey--text text--darken-3">
-              {{ sampleEndTime }}
-            </div>
-            <div class="pt-1 text-subtitle-1">{{ sampleEnd }}</div>
-          </v-card-text>
-        </v-card>
-      </div>
+      <loop-info
+        :current-time="currentTime"
+        :current-sample="currentSample"
+        :sample-start-time="sampleStartTime"
+        :sample-start="sampleStart"
+        :looplength-time="looplengthTime"
+        :looplength-sample="looplengthSample"
+        :sample-end-time="sampleEndTime"
+        :sample-end="sampleEnd"
+      />
     </div>
 
     <div class="my-4" style="position: relative">
@@ -530,11 +503,5 @@ body {
 }
 .buttons {
   margin-bottom: 1em;
-}
-.loopInfo > div {
-  min-width: 150px;
-}
-.loopInfo .big {
-  font-size: 1.5rem;
 }
 </style>
