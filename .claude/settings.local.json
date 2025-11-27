@@ -12,7 +12,9 @@
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
       "Bash(NODE_OPTIONS=--openssl-legacy-provider npm run dev:*)",
-      "Bash(npm view:*)"
+      "Bash(npm view:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)"
     ],
     "deny": [],
     "ask": []

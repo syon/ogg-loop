@@ -6,6 +6,7 @@ import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
 import AudioControls from '@/components/AudioControls'
 import LoopInfo from '@/components/LoopInfo'
+import FileToolbar from '@/components/FileToolbar'
 import Ogg from '@/lib/Ogg'
 import Surf from '@/lib/Surf'
 
@@ -270,10 +271,11 @@ const handleScanOgg = async () => {
   loading.value = true
   try {
     meta.value = await Ogg.scan(myfile.value)
+    // Update store with the scanned file
+    await dropperStore.load([myfile.value])
   } catch (e) {
     alert('Scan Error.')
   }
-  refresh()
   metaReady.value = true
   loading.value = false
 }
@@ -359,74 +361,18 @@ onMounted(async () => {
 <template>
   <v-card class="LoopEditor pa-8" min-height="85vh">
     <drop-zone />
-    <div class="d-flex align-center justify-space-between">
-      <div class="d-flex align-center">
-        <v-file-input
-          v-model="myfile"
-          name="myfile"
-          accept="audio/ogg"
-          show-size
-          variant="outlined"
-          label="Ogg File"
-          hide-details
-          style="width: 400px"
-          class="mr-4"
-        />
-        <template v-if="!metaReady">
-          <v-btn variant="flat" type="button" @click="handleScanOgg">
-            <v-icon start>mdi-spotlight-beam</v-icon>
-            Scan
-          </v-btn>
-        </template>
-        <template v-else>
-          <v-menu :close-on-content-click="false" min-width="250">
-            <template #activator="{ props }">
-              <v-btn v-bind="props">
-                <v-icon start>mdi-details</v-icon>
-                Meta
-              </v-btn>
-            </template>
-            <v-card>
-              <v-card-text v-for="(v, k) in meta" :key="k">
-                <div class="text-caption">{{ k }}</div>
-                <div class="text-body-1 text-grey-darken-4">{{ v }}</div>
-              </v-card-text>
-            </v-card>
-          </v-menu>
-        </template>
-      </div>
-      <form
-        action="/api/write"
-        method="post"
-        enctype="multipart/form-data"
-        class="d-flex align-center"
-        @submit.prevent="handleSubmit"
-      >
-        <v-text-field
-          v-model="formLoopStartSample"
-          type="number"
-          label="LOOPSTART"
-          variant="outlined"
-          hide-details
-          density="compact"
-          class="mr-4"
-          style="width: 140px"
-          @change="syncFormToRegion"
-        />
-        <v-text-field
-          v-model="formLoopLengthSample"
-          type="number"
-          label="LOOPLENGTH"
-          variant="outlined"
-          hide-details
-          density="compact"
-          class="mr-4"
-          style="width: 140px"
-          @change="syncFormToRegion"
-        />
-        <v-btn type="submit" color="primary">Download</v-btn>
-      </form>
-    </div>
+
+    <file-toolbar
+      v-model:myfile="myfile"
+      v-model:form-loop-start-sample="formLoopStartSample"
+      v-model:form-loop-length-sample="formLoopLengthSample"
+      :meta-ready="metaReady"
+      :meta="meta"
+      @handle-scan-ogg="handleScanOgg"
+      @handle-submit="handleSubmit"
+      @sync-form-to-region="syncFormToRegion"
+    />
+
     <v-divider class="my-6" />
 
     <audio-controls
