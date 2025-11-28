@@ -24,9 +24,6 @@ const meta = ref({})
 const metaReady = ref(false)
 const loading = ref(false)
 const loop = ref(true)
-const regionOutListener = ref(null)
-const loopAudioprocessListener = ref(null)
-const loopAnimationFrame = ref(null)
 const formLoopStartSample = ref(null)
 const formLoopLengthSample = ref(null)
 
@@ -131,10 +128,10 @@ const load = (fileBuffer) => {
       region.value.on('update-end', () => {
         syncRegionToForm()
       })
-
-      // Set up loop playback handler
-      setupLoopHandler()
     }
+
+    // Set up loop playback handler using regions plugin
+    setupLoopHandler()
   })
 
   wavesurfer.value.on('audioprocess', (sec) => {
@@ -153,7 +150,16 @@ const load = (fileBuffer) => {
 }
 
 const playPause = () => {
-  wavesurfer.value.playPause()
+  if (wavesurfer.value.isPlaying()) {
+    wavesurfer.value.pause()
+  } else {
+    // Start playing the region if loop is enabled
+    if (loop.value && region.value) {
+      region.value.play()
+    } else {
+      wavesurfer.value.play()
+    }
+  }
 }
 
 const handleSkip = (offset) => {
@@ -191,64 +197,21 @@ const changeSpeed = (v) => {
   wavesurfer.value.setPlaybackRate(Number(v))
 }
 
-const handleChangeLoop = () => {
-  // Re-setup loop handler when loop toggle changes
-  setupLoopHandler()
-}
-
 const setupLoopHandler = () => {
-  if (!region.value || !wavesurfer.value) return
+  if (!wavesurfer.value || !wavesurfer.value.regionsPlugin) return
 
-  // Remove existing listeners
-  if (regionOutListener.value) {
-    region.value.un('out', regionOutListener.value)
-    regionOutListener.value = null
-  }
-  if (loopAudioprocessListener.value) {
-    wavesurfer.value.un('audioprocess', loopAudioprocessListener.value)
-    loopAudioprocessListener.value = null
-  }
-  if (loopAnimationFrame.value) {
-    cancelAnimationFrame(loopAnimationFrame.value)
-    loopAnimationFrame.value = null
-  }
+  const regionsPlugin = wavesurfer.value.regionsPlugin
 
-  if (loop.value) {
-    // Official WaveSurfer.js v7 region looping approach
-    regionOutListener.value = () => {
-      region.value.play()
+  regionsPlugin.on('region-in', (reg) => {
+    console.log('region-in', reg)
+  })
+
+  regionsPlugin.on('region-out', (reg) => {
+    console.log('region-out', reg)
+    if (loop.value) {
+      reg.play()
     }
-    region.value.on('out', regionOutListener.value)
-
-    // Use requestAnimationFrame for high-precision loop monitoring
-    // This provides much better timing accuracy than audioprocess
-    const checkLoop = () => {
-      if (!wavesurfer.value || !wavesurfer.value.isPlaying() || !loop.value) {
-        return
-      }
-
-      const currentTime = wavesurfer.value.getCurrentTime()
-
-      // If we've reached the region end, jump back to start
-      if (currentTime >= region.value.end) {
-        wavesurfer.value.setTime(region.value.start)
-      }
-
-      // Continue checking
-      loopAnimationFrame.value = requestAnimationFrame(checkLoop)
-    }
-
-    // Store the animation frame ID for cleanup
-    loopAnimationFrame.value = requestAnimationFrame(checkLoop)
-
-    // Also keep audioprocess as backup
-    loopAudioprocessListener.value = (currentTime) => {
-      if (wavesurfer.value.isPlaying() && currentTime >= region.value.end) {
-        wavesurfer.value.setTime(region.value.start)
-      }
-    }
-    wavesurfer.value.on('audioprocess', loopAudioprocessListener.value)
-  }
+  })
 }
 
 const syncRegionToForm = () => {
@@ -403,7 +366,6 @@ onMounted(async () => {
           hide-details
           label="Loop"
           style="margin: 0"
-          @click="handleChangeLoop"
         />
       </div>
 
