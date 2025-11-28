@@ -79,6 +79,9 @@ export default {
 </script>
 
 <style>
+body {
+  background: #f8f8f8;
+}
 .v-application {
   background-image: url(/sea.jpg);
 }
@@ -92,6 +95,13 @@ export default {
 .v-toolbar--prominent:not(.v-toolbar--bottom) .v-toolbar__title {
   padding-top: 6px;
   align-self: flex-start;
+}
+.v-container {
+  width: 100%;
+  max-width: 100%;
+  margin: auto;
+  padding-left: 16px;
+  padding-right: 16px;
 }
 .screenshot-wrap {
   max-width: 800px;

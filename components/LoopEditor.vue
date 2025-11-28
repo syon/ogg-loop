@@ -286,21 +286,8 @@ onMounted(async () => {
 </template>
 
 <style>
-body {
-  background: #f8f8f8;
-}
-.v-container {
-  width: 100%;
-  max-width: 100%;
-  margin: auto;
-  padding-left: 16px;
-  padding-right: 16px;
-}
 .LoopEditor {
   width: 100%;
   margin-top: -64px;
-}
-.buttons {
-  margin-bottom: 1em;
 }
 </style>
