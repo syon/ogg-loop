@@ -14,7 +14,6 @@ const dropperStore = useDropperStore()
 
 // Reactive state
 const myfile = ref(null)
-const audioprocess = ref(0)
 const zoomVal = ref(0)
 const volumeVal = ref(50)
 const speedVal = ref(1.0)
@@ -31,46 +30,8 @@ const gFile = computed(() => dropperStore.gFile)
 const gLastLoaded = computed(() => dropperStore.gLastLoaded)
 const gFileInfo = computed(() => dropperStore.gFileInfo)
 const gFileBuffer = computed(() => dropperStore.gFileBuffer)
+const gRegion = computed(() => dropperStore.gRegion)
 
-const currentSample = computed(() => Math.round(audioprocess.value * 44100))
-const currentTime = computed(() => formatTime(audioprocess.value))
-
-const region = ref({})
-
-const sampleStart = computed(() => {
-  if (region.value) {
-    const crr = region.value.start
-    return Math.round(crr * 44100)
-  }
-  return ''
-})
-
-const sampleStartTime = computed(() => {
-  if (region.value) {
-    return formatTime(region.value.start)
-  }
-  return ''
-})
-
-const sampleEnd = computed(() => {
-  if (region.value) {
-    const crr = region.value.end
-    return Math.round(crr * 44100)
-  }
-  return ''
-})
-
-const sampleEndTime = computed(() => {
-  if (region.value) {
-    return formatTime(region.value.end)
-  }
-  return ''
-})
-
-const looplengthSample = computed(() => sampleEnd.value - sampleStart.value)
-const looplengthTime = computed(() =>
-  formatTime(looplengthSample.value / 44100),
-)
 const isPlaying = computed(
   () => waveformRef.value && waveformRef.value.isPlaying(),
 )
@@ -85,13 +46,15 @@ watch(gLastLoaded, () => {
   refresh()
 })
 
-// Methods
-const formatTime = (v) => {
-  let sec = v
-  if (!v) sec = 0
-  return new Date(sec * 1000).toISOString().slice(14, -1)
-}
+// Sync form values with store region
+watch(gRegion, (newRegion) => {
+  if (newRegion) {
+    formLoopStartSample.value = Math.round(newRegion.start * 44100)
+    formLoopLengthSample.value = Math.round((newRegion.end - newRegion.start) * 44100)
+  }
+}, { deep: true })
 
+// Methods
 const applySampleAudio = async () => {
   const url = `${location.origin}/TropicalBeach.ogg`
   const blob = await $fetch(url, { responseType: 'blob' })
@@ -103,11 +66,6 @@ const applySampleAudio = async () => {
 
 const refresh = () => {
   myfile.value = gFile.value
-}
-
-const handleRegionUpdate = (newRegion) => {
-  region.value = newRegion
-  syncRegionToForm()
 }
 
 const playPause = () => {
@@ -123,8 +81,8 @@ const handleSkip = (offset) => {
 }
 
 const handleRepeat = (offset) => {
-  if (waveformRef.value && region.value) {
-    const sec = region.value.end - offset
+  if (waveformRef.value && gRegion.value) {
+    const sec = gRegion.value.end - offset
     waveformRef.value.play(sec)
   }
 }
@@ -153,20 +111,18 @@ const changeSpeed = (v) => {
   }
 }
 
-const syncRegionToForm = () => {
-  formLoopStartSample.value = Math.round(region.value.start * 44100)
-  formLoopLengthSample.value = Math.round(
-    (region.value.end - region.value.start) * 44100,
-  )
-}
-
 const syncFormToRegion = () => {
-  if (!region.value || !waveformRef.value) return
+  if (!gRegion.value || !waveformRef.value) return
   const start = Number(formLoopStartSample.value) / 44100
   const end =
     (Number(formLoopStartSample.value) + Number(formLoopLengthSample.value)) /
     44100
   waveformRef.value.updateRegion(start, end)
+  // Update store as well
+  dropperStore.updateRegionFromSamples(
+    Number(formLoopStartSample.value),
+    Number(formLoopLengthSample.value),
+  )
 }
 
 const handleScanOgg = async () => {
@@ -254,16 +210,7 @@ onMounted(async () => {
 
       <v-divider vertical class="mx-8 my-4" />
 
-      <loop-info
-        :current-time="currentTime"
-        :current-sample="currentSample"
-        :sample-start-time="sampleStartTime"
-        :sample-start="sampleStart"
-        :looplength-time="looplengthTime"
-        :looplength-sample="looplengthSample"
-        :sample-end-time="sampleEndTime"
-        :sample-end="sampleEnd"
-      />
+      <LoopInfo />
     </div>
 
     <WaveformTimeline
@@ -273,14 +220,10 @@ onMounted(async () => {
       :looplength="meta.LOOPLENGTH"
       :loop="loop"
       :volume-val="volumeVal"
-      @update:region="handleRegionUpdate"
-      @audioprocess="audioprocess = $event"
-      @seeking="audioprocess = $event"
-      @region-update-end="syncRegionToForm"
     />
 
     <v-overlay :value="loading">
-      <v-progress-circular indeterminate size="64"></v-progress-circular>
+      <v-progress-circular indeterminate size="64" />
     </v-overlay>
   </v-card>
 </template>

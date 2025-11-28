@@ -1,6 +1,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import Surf from '@/lib/Surf'
+import { useDropperStore } from '@/stores/dropper'
+
+const dropperStore = useDropperStore()
 
 const props = defineProps({
   fileBuffer: {
@@ -26,10 +29,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'update:region',
   'audioprocess',
   'seeking',
-  'region-update-end',
 ])
 
 const wavesurfer = ref(null)
@@ -69,27 +70,27 @@ const loadWaveform = (fileBuffer) => {
   // Wait for initial region to be created
   wavesurfer.value.once('decode', () => {
     region.value = wavesurfer.value.initialRegion
-    emit('update:region', region.value)
+    // Store region in dropperStore
+    dropperStore.setRegion({
+      start: region.value.start,
+      end: region.value.end,
+    })
 
     // Inject custom styles into Shadow DOM
     injectShadowStyles()
-
-    // Set up region event listeners
-    if (region.value) {
-      region.value.on('update-end', () => {
-        emit('region-update-end', region.value)
-      })
-    }
 
     // Set up loop playback handler using regions plugin
     setupLoopHandler()
   })
 
   wavesurfer.value.on('audioprocess', (sec) => {
+    dropperStore.setAudioprocess(sec)
     emit('audioprocess', sec)
   })
 
   wavesurfer.value.on('seeking', (sec) => {
+    console.log('seeking', sec)
+    dropperStore.setAudioprocess(sec)
     emit('seeking', sec)
   })
 
@@ -117,7 +118,14 @@ const setupLoopHandler = () => {
     }
   })
 
-  console.log('Loop handler set up')
+  regionsPlugin.on('region-update', (region, side) => {
+    console.log('[region-update]', { region, side })
+    // Update store with new region values
+    dropperStore.setRegion({
+      start: region.start,
+      end: region.end,
+    })
+  })
 }
 
 const injectShadowStyles = () => {

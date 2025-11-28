@@ -1,38 +1,18 @@
 <script setup>
-defineProps({
-  currentTime: {
-    type: String,
-    required: true,
-  },
-  currentSample: {
-    type: [Number, String],
-    required: true,
-  },
-  sampleStartTime: {
-    type: String,
-    required: true,
-  },
-  sampleStart: {
-    type: [Number, String],
-    required: true,
-  },
-  looplengthTime: {
-    type: String,
-    required: true,
-  },
-  looplengthSample: {
-    type: [Number, String],
-    required: true,
-  },
-  sampleEndTime: {
-    type: String,
-    required: true,
-  },
-  sampleEnd: {
-    type: [Number, String],
-    required: true,
-  },
-})
+import { computed } from 'vue'
+import { useDropperStore } from '@/stores/dropper'
+
+const dropperStore = useDropperStore()
+
+// Get all values from store
+const currentTime = computed(() => dropperStore.gCurrentTime)
+const currentSample = computed(() => dropperStore.gCurrentSample)
+const sampleStartTime = computed(() => dropperStore.gSampleStartTime)
+const sampleStart = computed(() => dropperStore.gSampleStart)
+const looplengthTime = computed(() => dropperStore.gLooplengthTime)
+const looplengthSample = computed(() => dropperStore.gLooplengthSample)
+const sampleEndTime = computed(() => dropperStore.gSampleEndTime)
+const sampleEnd = computed(() => dropperStore.gSampleEnd)
 </script>
 
 <template>

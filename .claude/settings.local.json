@@ -14,7 +14,9 @@
       "Bash(NODE_OPTIONS=--openssl-legacy-provider npm run dev:*)",
       "Bash(npm view:*)",
       "Bash(curl:*)",
-      "Bash(npm run dev:*)"
+      "Bash(npm run dev:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx nuxt typecheck:*)"
     ],
     "deny": [],
     "ask": []
