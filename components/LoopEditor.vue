@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue'
 import FileDownload from 'js-file-download'
-import { useDropperStore } from '@/stores/dropper'
+import { useAppStateStore } from '@/stores/appState'
 import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
 import AudioControls from '@/components/AudioControls'
@@ -10,7 +10,7 @@ import FileToolbar from '@/components/FileToolbar'
 import WaveformTimeline from '@/components/WaveformTimeline'
 import Ogg from '@/lib/Ogg'
 
-const dropperStore = useDropperStore()
+const appState = useAppStateStore()
 
 // Reactive state
 const myfile = ref(null)
@@ -26,12 +26,6 @@ const formLoopStartSample = ref(null)
 const formLoopLengthSample = ref(null)
 
 // Computed properties
-const gFile = computed(() => dropperStore.gFile)
-const gLastLoaded = computed(() => dropperStore.gLastLoaded)
-const gFileInfo = computed(() => dropperStore.gFileInfo)
-const gFileBuffer = computed(() => dropperStore.gFileBuffer)
-const gRegion = computed(() => dropperStore.gRegion)
-
 const isPlaying = computed(
   () => waveformRef.value && waveformRef.value.isPlaying(),
 )
@@ -41,18 +35,27 @@ watch(myfile, () => {
   metaReady.value = false
 })
 
-watch(gLastLoaded, () => {
-  metaReady.value = false
-  refresh()
-})
+watch(
+  () => appState.gLastLoaded,
+  () => {
+    metaReady.value = false
+    refresh()
+  },
+)
 
 // Sync form values with store region
-watch(gRegion, (newRegion) => {
-  if (newRegion) {
-    formLoopStartSample.value = Math.round(newRegion.start * 44100)
-    formLoopLengthSample.value = Math.round((newRegion.end - newRegion.start) * 44100)
-  }
-}, { deep: true })
+watch(
+  () => appState.gRegion,
+  (newRegion) => {
+    if (newRegion) {
+      formLoopStartSample.value = Math.round(newRegion.start * 44100)
+      formLoopLengthSample.value = Math.round(
+        (newRegion.end - newRegion.start) * 44100,
+      )
+    }
+  },
+  { deep: true },
+)
 
 // Methods
 const applySampleAudio = async () => {
@@ -60,12 +63,12 @@ const applySampleAudio = async () => {
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
   meta.value = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
-  await dropperStore.load([file])
+  await appState.load([file])
   metaReady.value = true
 }
 
 const refresh = () => {
-  myfile.value = gFile.value
+  myfile.value = appState.gFile
 }
 
 const playPause = () => {
@@ -81,8 +84,8 @@ const handleSkip = (offset) => {
 }
 
 const handleRepeat = (offset) => {
-  if (waveformRef.value && gRegion.value) {
-    const sec = gRegion.value.end - offset
+  if (waveformRef.value && appState.gRegion) {
+    const sec = appState.gRegion.end - offset
     waveformRef.value.play(sec)
   }
 }
@@ -112,14 +115,14 @@ const changeSpeed = (v) => {
 }
 
 const syncFormToRegion = () => {
-  if (!gRegion.value || !waveformRef.value) return
+  if (!appState.gRegion || !waveformRef.value) return
   const start = Number(formLoopStartSample.value) / 44100
   const end =
     (Number(formLoopStartSample.value) + Number(formLoopLengthSample.value)) /
     44100
   waveformRef.value.updateRegion(start, end)
   // Update store as well
-  dropperStore.updateRegionFromSamples(
+  appState.updateRegionFromSamples(
     Number(formLoopStartSample.value),
     Number(formLoopLengthSample.value),
   )
@@ -130,7 +133,7 @@ const handleScanOgg = async () => {
   try {
     meta.value = await Ogg.scan(myfile.value)
     // Update store with the scanned file
-    await dropperStore.load([myfile.value])
+    await appState.load([myfile.value])
   } catch (e) {
     alert('Scan Error.')
   }
@@ -146,7 +149,7 @@ const handleSubmit = async () => {
       loopstart: formLoopStartSample.value,
       looplength: formLoopLengthSample.value,
     })
-    const filename = `${gFileInfo.value.name.replace('.ogg', '')}_(Loop).ogg`
+    const filename = `${appState.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
     FileDownload(data, filename)
   } catch (e) {
     alert('Write Error.')
@@ -215,7 +218,7 @@ onMounted(async () => {
 
     <WaveformTimeline
       ref="waveformRef"
-      :file-buffer="gFileBuffer"
+      :file-buffer="appState.gFileBuffer"
       :loopstart="meta.LOOPSTART"
       :looplength="meta.LOOPLENGTH"
       :loop="loop"

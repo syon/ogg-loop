@@ -1,9 +1,9 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import Surf from '@/lib/Surf'
-import { useDropperStore } from '@/stores/dropper'
+import { useAppStateStore } from '@/stores/appState'
 
-const dropperStore = useDropperStore()
+const appState = useAppStateStore()
 
 const props = defineProps({
   fileBuffer: {
@@ -70,8 +70,8 @@ const loadWaveform = (fileBuffer) => {
   // Wait for initial region to be created
   wavesurfer.value.once('decode', () => {
     region.value = wavesurfer.value.initialRegion
-    // Store region in dropperStore
-    dropperStore.setRegion({
+    // Store region in appState
+    appState.setRegion({
       start: region.value.start,
       end: region.value.end,
     })
@@ -84,13 +84,13 @@ const loadWaveform = (fileBuffer) => {
   })
 
   wavesurfer.value.on('audioprocess', (sec) => {
-    dropperStore.setAudioprocess(sec)
+    appState.setAudioprocess(sec)
     emit('audioprocess', sec)
   })
 
   wavesurfer.value.on('seeking', (sec) => {
     console.log('seeking', sec)
-    dropperStore.setAudioprocess(sec)
+    appState.setAudioprocess(sec)
     emit('seeking', sec)
   })
 
@@ -121,7 +121,7 @@ const setupLoopHandler = () => {
   regionsPlugin.on('region-update', (region, side) => {
     console.log('[region-update]', { region, side })
     // Update store with new region values
-    dropperStore.setRegion({
+    appState.setRegion({
       start: region.start,
       end: region.end,
     })

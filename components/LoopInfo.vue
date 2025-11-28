@@ -1,18 +1,18 @@
 <script setup>
 import { computed } from 'vue'
-import { useDropperStore } from '@/stores/dropper'
+import { useAppStateStore } from '@/stores/appState'
 
-const dropperStore = useDropperStore()
+const appState = useAppStateStore()
 
 // Get all values from store
-const currentTime = computed(() => dropperStore.gCurrentTime)
-const currentSample = computed(() => dropperStore.gCurrentSample)
-const sampleStartTime = computed(() => dropperStore.gSampleStartTime)
-const sampleStart = computed(() => dropperStore.gSampleStart)
-const looplengthTime = computed(() => dropperStore.gLooplengthTime)
-const looplengthSample = computed(() => dropperStore.gLooplengthSample)
-const sampleEndTime = computed(() => dropperStore.gSampleEndTime)
-const sampleEnd = computed(() => dropperStore.gSampleEnd)
+const currentTime = computed(() => appState.gCurrentTime)
+const currentSample = computed(() => appState.gCurrentSample)
+const sampleStartTime = computed(() => appState.gSampleStartTime)
+const sampleStart = computed(() => appState.gSampleStart)
+const looplengthTime = computed(() => appState.gLooplengthTime)
+const looplengthSample = computed(() => appState.gLooplengthSample)
+const sampleEndTime = computed(() => appState.gSampleEndTime)
+const sampleEnd = computed(() => appState.gSampleEnd)
 </script>
 
 <template>

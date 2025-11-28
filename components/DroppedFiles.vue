@@ -9,13 +9,13 @@
 </template>
 
 <script>
-import { useDropperStore } from '@/stores/dropper'
+import { useAppStateStore } from '@/stores/appState'
 
 export default {
   setup() {
-    const dropperStore = useDropperStore()
+    const appState = useAppStateStore()
     return {
-      dropperStore,
+      appState,
     }
   },
   data: () => ({
@@ -27,7 +27,7 @@ export default {
   }),
   computed: {
     droppedFiles() {
-      const fileInfo = this.dropperStore.gFileInfo
+      const fileInfo = this.appState.gFileInfo
       return fileInfo && fileInfo.name ? [fileInfo] : []
     },
   },

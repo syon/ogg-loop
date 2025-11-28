@@ -7,7 +7,7 @@ interface Region {
   end: number // seconds
 }
 
-export const useDropperStore = defineStore('dropper', {
+export const useAppStateStore = defineStore('appState', {
   state: () => ({
     file: null as File | null,
     buffer: null as string | null,

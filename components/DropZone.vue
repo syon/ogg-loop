@@ -14,17 +14,17 @@
 <script>
 import { ref } from 'vue'
 import { useDropZone } from '@vueuse/core'
-import { useDropperStore } from '@/stores/dropper'
+import { useAppStateStore } from '@/stores/appState'
 
 export default {
   setup() {
     const dropZoneRef = ref(null)
-    const dropperStore = useDropperStore()
+    const appState = useAppStateStore()
 
     const onDrop = (files) => {
       if (files && files.length > 0) {
         console.log({ files })
-        dropperStore.load(Array.from(files))
+        appState.load(Array.from(files))
       }
     }
 
