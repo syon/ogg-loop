@@ -50,45 +50,32 @@ watch(
 
 const loadWaveform = (fileBuffer) => {
   if (wavesurfer.value) {
-    try {
-      wavesurfer.value.destroy()
-    } catch (e) {
-      console.warn('Failed to destroy wavesurfer:', e)
-    }
+    wavesurfer.value.destroy()
   }
 
   const options = {
     loopstart: appState.gLoopstart,
     looplength: appState.gLooplength,
   }
-  console.log('[WaveformTimeline] loadWaveform options:', options)
-  console.log('[WaveformTimeline] appState.gMetadata:', appState.gMetadata)
   wavesurfer.value = Surf.create(options)
 
-  // Wait for initial region to be created
-  wavesurfer.value.once('decode', () => {
-    region.value = wavesurfer.value.initialRegion
-    // Store region in appState
-    appState.setRegion({
-      start: region.value.start,
-      end: region.value.end,
-    })
-
-    // Inject custom styles into Shadow DOM
-    injectShadowStyles()
-
-    // Set up loop playback handler using regions plugin
-    setupLoopHandler()
-  })
+  // Get the initial region from regions list
+  const list = wavesurfer.value.regions.list
+  const [, initialRegion] = Object.entries(list)[0]
+  region.value = initialRegion
 
   wavesurfer.value.on('audioprocess', (sec) => {
     appState.setAudioprocess(sec)
     emit('audioprocess', sec)
   })
 
-  wavesurfer.value.on('seeking', (sec) => {
+  wavesurfer.value.on('seek', () => {
+    const sec = wavesurfer.value.getCurrentTime()
     appState.setAudioprocess(sec)
     emit('seeking', sec)
+    if (region.value && (sec < region.value.start || region.value.end < sec)) {
+      region.value.loop = false
+    }
   })
 
   if (fileBuffer) {
@@ -97,86 +84,32 @@ const loadWaveform = (fileBuffer) => {
 
   // Set initial volume
   wavesurfer.value.setVolume(Number(props.volumeVal / 100))
-}
 
-const setupLoopHandler = () => {
-  if (!wavesurfer.value || !wavesurfer.value.regionsPlugin) return
-
-  const regionsPlugin = wavesurfer.value.regionsPlugin
-
-  regionsPlugin.on('region-in', (reg) => {
-  })
-
-  regionsPlugin.on('region-out', (reg) => {
+  wavesurfer.value.on('region-in', (reg) => {
     if (props.loop) {
-      reg.play()
+      reg.loop = true
     }
   })
 
-  regionsPlugin.on('region-update', (region, side) => {
-    // Update store with new region values
+  wavesurfer.value.on('region-out', (reg) => {
+    reg.loop = false
+  })
+
+  wavesurfer.value.on('ready', () => {
     appState.setRegion({
-      start: region.start,
-      end: region.end,
+      start: region.value.start,
+      end: region.value.end,
+    })
+  })
+
+  wavesurfer.value.on('region-updated', (reg) => {
+    appState.setRegion({
+      start: reg.start,
+      end: reg.end,
     })
   })
 }
 
-const injectShadowStyles = () => {
-  // Find the waveform container
-  const waveformContainer = document.querySelector('#waveform')
-  if (!waveformContainer) return
-
-  // Try finding shadow DOM containers
-  const canvasElements = waveformContainer.querySelectorAll('div')
-  canvasElements.forEach((el) => {
-    if (el.shadowRoot) {
-      addStylesToShadowRoot(el.shadowRoot)
-    }
-  })
-
-  // Directly target elements with part attribute using partial match (~=)
-  const regionElements = waveformContainer.querySelectorAll('[part~="region"]')
-  regionElements.forEach((el) => {
-    el.style.height = '50%'
-    el.style.zIndex = '9'
-  })
-
-  const handleElements = waveformContainer.querySelectorAll(
-    '[part~="region-handle"]',
-  )
-  handleElements.forEach((el) => {
-    el.style.backgroundColor = '#f57f17'
-    el.style.width = '2px'
-  })
-
-  // Add global styles using ::part() and attribute selectors
-  const styleElement = document.createElement('style')
-  styleElement.textContent = `
-    ::part(region) {
-      height: 50% !important;
-      z-index: 9 !important;
-    }
-    ::part(region-handle) {
-      border-color: #f57f17 !important;
-    }
-  `
-  document.head.appendChild(styleElement)
-}
-
-const addStylesToShadowRoot = (shadowRoot) => {
-  const style = document.createElement('style')
-  style.textContent = `
-    ::part(region) {
-      height: 50% !important;
-      z-index: 9 !important;
-    }
-    ::part(region-handle) {
-      border-color: #f57f17 !important;
-    }
-  `
-  shadowRoot.appendChild(style)
-}
 
 // Public methods exposed to parent
 const playPause = () => {
@@ -220,7 +153,7 @@ const isPlaying = () => {
 
 const updateRegion = (start, end) => {
   if (region.value) {
-    region.value.setOptions({ start, end })
+    region.value.update({ start, end })
   }
 }
 

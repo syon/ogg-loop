@@ -1,3 +1,8 @@
+# Wavesurfer v4
+
+## Surf.js
+
+```js
 import debug from 'debug'
 import WaveSurfer from 'wavesurfer.js'
 import RegionsPlugin from 'wavesurfer.js/dist/plugin/wavesurfer.regions'
@@ -7,34 +12,15 @@ import TimelinePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.timeline'
 
 const dg = debug('@:Surf')
 
-// Audio calculation constants and utilities
-export const SAMPLE_RATE = 44100
-
-// Convert samples to seconds
-export function samplesToSeconds(samples) {
-  return Number(samples) / SAMPLE_RATE
-}
-
-// Convert seconds to samples
-export function secondsToSamples(seconds) {
-  return Math.round(Number(seconds) * SAMPLE_RATE)
-}
-
-// Calculate loop end time from start sample and length sample
-export function calculateLoopEnd(startSample, lengthSample) {
-  return samplesToSeconds(Number(startSample) + Number(lengthSample))
-}
-
 // https://wavesurfer-js.org/docs/methods.html
 export default class Surf {
   static create(options) {
     let loopstartSec = null
     let loopendSec = null
     if (options && options.loopstart && options.looplength) {
-      loopstartSec = samplesToSeconds(options.loopstart)
-      loopendSec = calculateLoopEnd(options.loopstart, options.looplength)
+      loopstartSec = Number(options.loopstart) / 44100
+      loopendSec = (Number(options.loopstart) + Number(options.looplength)) / 44100
     }
-
     const ws = WaveSurfer.create({
       container: '#waveform',
       waveColor: '#4DD0E1',
@@ -74,3 +60,55 @@ export default class Surf {
     return ws
   }
 }
+```
+
+## LoopEditor.vue
+
+```js
+    load(fileBuffer) {
+      if (this.wavesurfer) {
+        this.wavesurfer.destroy()
+      }
+      const options = {
+        loopstart: this.meta.LOOPSTART,
+        looplength: this.meta.LOOPLENGTH,
+      }
+      this.wavesurfer = Surf.create(options)
+      const list = this.wavesurfer.regions.list
+      const [, region] = Object.entries(list)[0]
+      this.region = region
+
+      this.wavesurfer.on('audioprocess', (sec) => {
+        this.audioprocess = sec
+      })
+
+      this.wavesurfer.on('seek', () => {
+        const sec = this.wavesurfer.getCurrentTime()
+        this.audioprocess = sec
+        if (sec < region.start || region.end < sec) {
+          region.loop = false
+        }
+      })
+
+      if (fileBuffer) {
+        this.wavesurfer.load(fileBuffer)
+      }
+
+      this.changeVolume()
+
+      this.wavesurfer.on('region-in', (region) => {
+        if (this.loop) {
+          region.loop = true
+        }
+      })
+      this.wavesurfer.on('region-out', (region) => {
+        region.loop = false
+      })
+      this.wavesurfer.on('ready', () => {
+        this.syncRegionToForm()
+      })
+      this.wavesurfer.on('region-updated', (region) => {
+        this.syncRegionToForm()
+      })
+    },
+```
