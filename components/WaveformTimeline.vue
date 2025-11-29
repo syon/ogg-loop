@@ -184,12 +184,8 @@ const playPause = () => {
     if (wavesurfer.value.isPlaying()) {
       wavesurfer.value.pause()
     } else {
-      // Start playing the region if loop is enabled
-      if (props.loop && region.value) {
-        region.value.play()
-      } else {
-        wavesurfer.value.play()
-      }
+      // Resume playing from current position
+      wavesurfer.value.play()
     }
   }
 }
