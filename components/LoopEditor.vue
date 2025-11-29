@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import FileDownload from 'js-file-download'
 import { useAppStateStore } from '@/stores/appState'
 import DropZone from '@/components/DropZone'
@@ -14,42 +14,38 @@ const appState = useAppStateStore()
 
 // Reactive state
 const myfile = ref(null)
-const volumeVal = ref(50)
-const speedVal = ref(1.0)
 const waveformRef = ref(null)
-const meta = ref({})
-const metaReady = ref(false)
-const loading = ref(false)
-const loop = ref(true)
 
-// Computed properties
-const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlaying())
+// Lifecycle
+onMounted(async () => {
+  await applySampleAudio()
+})
 
 // Watchers
 watch(myfile, () => {
-  metaReady.value = false
+  appState.clearMetadata()
 })
 
 watch(
   () => appState.gLastLoaded,
   () => {
-    metaReady.value = false
-    refresh()
+    appState.clearMetadata()
+    myfile.value = appState.gFile
   },
 )
 
+// Computed properties
+const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlaying())
+
 // Methods
 const applySampleAudio = async () => {
+  console.log('-------------Applying sample audio file...')
   const url = `${location.origin}/TropicalBeach.ogg`
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
-  meta.value = { LOOPSTART: 5487730, LOOPLENGTH: 3080921 }
   await appState.load([file])
-  metaReady.value = true
-}
-
-const refresh = () => {
-  myfile.value = appState.gFile
+  // Set metadata AFTER loading file to avoid clearMetadata() race
+  appState.setMetadata({ LOOPSTART: 5487730, LOOPLENGTH: 3080921 })
 }
 
 const playPause = () => {
@@ -73,35 +69,31 @@ const changeZoom = (operation) => {
 }
 
 const changeSpeed = (v) => {
-  speedVal.value = v
+  appState.setSpeed(v)
   waveformRef.value?.setPlaybackRate(Number(v))
 }
 
 const syncFormToRegion = () => {
   if (!appState.gRegion || !waveformRef.value) return
+  appState.syncFormToRegion()
   waveformRef.value.updateRegion(appState.gFormLoopStartSeconds, appState.gFormLoopEndSeconds)
-  // Update store as well
-  appState.updateRegionByForm(
-    Number(appState.formLoopStartSample),
-    Number(appState.formLoopLengthSample),
-  )
 }
 
 const handleScanOgg = async () => {
-  loading.value = true
+  appState.setLoading(true)
   try {
-    meta.value = await Ogg.scan(myfile.value)
+    const meta = await Ogg.scan(myfile.value)
+    appState.setMetadata(meta)
     // Update store with the scanned file
     await appState.load([myfile.value])
   } catch (e) {
     alert('Scan Error.')
   }
-  metaReady.value = true
-  loading.value = false
+  appState.setLoading(false)
 }
 
 const handleSubmit = async () => {
-  loading.value = true
+  appState.setLoading(true)
   try {
     const data = await Ogg.write({
       myfile: myfile.value,
@@ -113,13 +105,8 @@ const handleSubmit = async () => {
   } catch (e) {
     alert('Write Error.')
   }
-  loading.value = false
+  appState.setLoading(false)
 }
-
-// Lifecycle
-onMounted(async () => {
-  await applySampleAudio()
-})
 </script>
 
 <template>
@@ -130,8 +117,8 @@ onMounted(async () => {
       v-model:myfile="myfile"
       v-model:form-loop-start-sample="appState.formLoopStartSample"
       v-model:form-loop-length-sample="appState.formLoopLengthSample"
-      :meta-ready="metaReady"
-      :meta="meta"
+      :meta-ready="appState.gMetadataReady"
+      :meta="appState.gMetadata"
       @handle-scan-ogg="handleScanOgg"
       @handle-submit="handleSubmit"
       @sync-form-to-region="syncFormToRegion"
@@ -140,8 +127,8 @@ onMounted(async () => {
     <v-divider class="my-6" />
 
     <AudioControls
-      v-model:speed-val="speedVal"
-      v-model:volume-val="volumeVal"
+      v-model:speed-val="appState.speed"
+      v-model:volume-val="appState.volume"
       @change-zoom="changeZoom"
       @change-speed="changeSpeed"
       @handle-skip="handleSkip"
@@ -161,7 +148,13 @@ onMounted(async () => {
             <span>Space</span>
           </template>
         </cmd-btn>
-        <v-switch v-model="loop" class="ml-6" hide-details label="Loop" style="margin: 0" />
+        <v-switch
+          v-model="appState.loopEnabled"
+          class="ml-6"
+          hide-details
+          label="Loop"
+          style="margin: 0"
+        />
       </div>
 
       <v-divider vertical class="mx-8 my-4" />
@@ -172,13 +165,11 @@ onMounted(async () => {
     <WaveformTimeline
       ref="waveformRef"
       :file-buffer="appState.gFileBuffer"
-      :loopstart="meta.LOOPSTART"
-      :looplength="meta.LOOPLENGTH"
-      :loop="loop"
-      :volume-val="volumeVal"
+      :loop="appState.gLoopEnabled"
+      :volume-val="appState.gVolume"
     />
 
-    <v-overlay :value="loading">
+    <v-overlay :value="appState.gLoading">
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
   </v-card>

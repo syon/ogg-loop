@@ -10,14 +10,6 @@ const props = defineProps({
     type: String,
     default: null,
   },
-  loopstart: {
-    type: Number,
-    default: null,
-  },
-  looplength: {
-    type: Number,
-    default: null,
-  },
   loop: {
     type: Boolean,
     default: true,
@@ -36,11 +28,13 @@ const emit = defineEmits([
 const wavesurfer = ref(null)
 const region = ref({})
 
-// Watch for file buffer changes
+// Watch for file buffer changes and loop metadata from store
 watch(
-  () => props.fileBuffer,
-  (newBuffer) => {
+  [() => props.fileBuffer, () => appState.gLoopstart, () => appState.gLooplength],
+  ([newBuffer]) => {
     if (newBuffer) {
+      console.log('Loading waveform with new buffer and loop metadata')
+      console.log('Loop metadata:', { loopstart: appState.gLoopstart, looplength: appState.gLooplength })
       loadWaveform(newBuffer)
     }
   },
@@ -58,12 +52,17 @@ watch(
 
 const loadWaveform = (fileBuffer) => {
   if (wavesurfer.value) {
-    wavesurfer.value.destroy()
+    try {
+      wavesurfer.value.destroy()
+    } catch (e) {
+      console.warn('Failed to destroy wavesurfer:', e)
+    }
   }
 
+  console.log('appState.gLoopstart', appState.gLoopstart)
   const options = {
-    loopstart: props.loopstart,
-    looplength: props.looplength,
+    loopstart: appState.gLoopstart,
+    looplength: appState.gLooplength,
   }
   wavesurfer.value = Surf.create(options)
 

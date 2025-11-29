@@ -16,6 +16,11 @@ export const useAppStateStore = defineStore('appState', {
     formLoopStartSample: null as number | null,
     formLoopLengthSample: null as number | null,
     zoom: 0, // zoom level for waveform
+    metadata: null as Record<string, any> | null, // OGG file metadata
+    volume: 50, // volume level (0-100)
+    speed: 1.0, // playback speed
+    loopEnabled: true, // loop playback enabled
+    loading: false, // loading state for async operations
   }),
 
   getters: {
@@ -71,6 +76,15 @@ export const useAppStateStore = defineStore('appState', {
       return formatTime(state.audioprocess)
     },
     gZoom: (state) => state.zoom,
+    gMetadata: (state) => state.metadata,
+    gMetadataReady: (state) => state.metadata !== null,
+    gLoopstart: (state) => state.metadata?.LOOPSTART || null,
+    gLooplength: (state) => state.metadata?.LOOPLENGTH || null,
+    gVolume: (state) => state.volume,
+    gSpeed: (state) => state.speed,
+    gVolumeNormalized: (state) => state.volume / 100, // 0-1 for WaveSurfer
+    gLoopEnabled: (state) => state.loopEnabled,
+    gLoading: (state) => state.loading,
   },
 
   actions: {
@@ -94,13 +108,17 @@ export const useAppStateStore = defineStore('appState', {
     },
 
     updateRegionByForm(startSample: number, lengthSample: number) {
-      this.region = {
-        start: samplesToSeconds(startSample),
-        end: samplesToSeconds(startSample + lengthSample),
-      }
+      const start = samplesToSeconds(startSample)
+      const end = samplesToSeconds(startSample + lengthSample)
+      this.region = { start, end }
       // Update form values
       this.formLoopStartSample = startSample
       this.formLoopLengthSample = lengthSample
+    },
+
+    syncFormToRegion() {
+      if (!this.formLoopStartSample || !this.formLoopLengthSample) return
+      this.updateRegionByForm(this.formLoopStartSample, this.formLoopLengthSample)
     },
 
     setFormLoopStartSample(value: number) {
@@ -127,6 +145,36 @@ export const useAppStateStore = defineStore('appState', {
           this.zoom = 0
           break
       }
+    },
+
+    setMetadata(meta: Record<string, any>) {
+      this.metadata = meta
+      console.log('Metadata arg:', meta)
+      console.log('Metadata set:', this.metadata)
+    },
+
+    clearMetadata() {
+      this.metadata = null
+    },
+
+    setVolume(value: number) {
+      this.volume = value
+    },
+
+    setSpeed(value: number) {
+      this.speed = value
+    },
+
+    toggleLoop() {
+      this.loopEnabled = !this.loopEnabled
+    },
+
+    setLoop(value: boolean) {
+      this.loopEnabled = value
+    },
+
+    setLoading(value: boolean) {
+      this.loading = value
     },
   },
 })
