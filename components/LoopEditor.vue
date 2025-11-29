@@ -22,10 +22,11 @@ onMounted(async () => {
 })
 
 // Watchers
-watch(myfile, () => {
-  // Only clear metadata if it's a user-selected file (not programmatic load)
-  if (myfile.value && !appState.gMetadataReady) {
+watch(myfile, async (newFile, oldFile) => {
+  // When a new file is selected, clear old metadata and auto-scan
+  if (newFile && newFile !== oldFile) {
     appState.clearMetadata()
+    await handleScanOgg()
   }
 })
 
@@ -89,22 +90,31 @@ const handleScanOgg = async () => {
     // Update store with the scanned file
     await appState.load([myfile.value])
   } catch (e) {
+    console.error('[LoopEditor] Scan error:', e)
     alert('Scan Error.')
   }
   appState.setLoading(false)
 }
 
 const handleSubmit = async () => {
+  // Use the file from appState instead of myfile.value
+  const fileToWrite = appState.gFile
+  if (!fileToWrite) {
+    alert('No file selected')
+    return
+  }
+
   appState.setLoading(true)
   try {
     const data = await Ogg.write({
-      myfile: myfile.value,
+      myfile: fileToWrite,
       loopstart: appState.formLoopStartSample,
       looplength: appState.formLoopLengthSample,
     })
     const filename = `${appState.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
     FileDownload(data, filename)
   } catch (e) {
+    console.error('[LoopEditor] Write error:', e)
     alert('Write Error.')
   }
   appState.setLoading(false)
