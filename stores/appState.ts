@@ -80,9 +80,7 @@ export const useAppStateStore = defineStore('appState', {
       this.region = region
       // Sync form values when region changes
       this.formLoopStartSample = Math.round(region.start * SAMPLE_RATE)
-      this.formLoopLengthSample = Math.round(
-        (region.end - region.start) * SAMPLE_RATE,
-      )
+      this.formLoopLengthSample = Math.round((region.end - region.start) * SAMPLE_RATE)
     },
 
     updateRegionByForm(startSample: number, lengthSample: number) {

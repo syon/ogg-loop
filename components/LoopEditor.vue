@@ -24,9 +24,7 @@ const loading = ref(false)
 const loop = ref(true)
 
 // Computed properties
-const isPlaying = computed(
-  () => waveformRef.value && waveformRef.value.isPlaying(),
-)
+const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlaying())
 
 // Watchers
 watch(myfile, () => {
@@ -101,9 +99,7 @@ const changeSpeed = (v) => {
 const syncFormToRegion = () => {
   if (!appState.gRegion || !waveformRef.value) return
   const start = Number(appState.formLoopStartSample) / 44100
-  const end =
-    (Number(appState.formLoopStartSample) + Number(appState.formLoopLengthSample)) /
-    44100
+  const end = (Number(appState.formLoopStartSample) + Number(appState.formLoopLengthSample)) / 44100
   waveformRef.value.updateRegion(start, end)
   // Update store as well
   appState.updateRegionByForm(
@@ -186,13 +182,7 @@ onMounted(async () => {
             <span>Space</span>
           </template>
         </cmd-btn>
-        <v-switch
-          v-model="loop"
-          class="ml-6"
-          hide-details
-          label="Loop"
-          style="margin: 0"
-        />
+        <v-switch v-model="loop" class="ml-6" hide-details label="Loop" style="margin: 0" />
       </div>
 
       <v-divider vertical class="mx-8 my-4" />

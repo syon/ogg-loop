@@ -38,6 +38,7 @@
     "vite-plugin-vuetify": "^2.1.2"
   },
   "prettier": {
+    "printWidth": 100,
     "semi": false,
     "singleQuote": true
   }
