@@ -61,6 +61,8 @@ const loadWaveform = (fileBuffer) => {
     loopstart: appState.gLoopstart,
     looplength: appState.gLooplength,
   }
+  console.log('[WaveformTimeline] loadWaveform options:', options)
+  console.log('[WaveformTimeline] appState.gMetadata:', appState.gMetadata)
   wavesurfer.value = Surf.create(options)
 
   // Wait for initial region to be created

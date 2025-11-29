@@ -15,6 +15,7 @@ const appState = useAppStateStore()
 // Reactive state
 const myfile = ref(null)
 const waveformRef = ref(null)
+const isLoadingSample = ref(false) // Flag to prevent auto-scan during sample load
 
 // Lifecycle
 onMounted(async () => {
@@ -24,7 +25,8 @@ onMounted(async () => {
 // Watchers
 watch(myfile, async (newFile, oldFile) => {
   // When a new file is selected, clear old metadata and auto-scan
-  if (newFile && newFile !== oldFile) {
+  // Skip if loading sample file
+  if (newFile && newFile !== oldFile && !isLoadingSample.value) {
     appState.clearMetadata()
     await handleScanOgg()
   }
@@ -42,6 +44,7 @@ const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlayin
 
 // Methods
 const applySampleAudio = async () => {
+  isLoadingSample.value = true
   const url = `${location.origin}/TropicalBeach.ogg`
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
@@ -49,6 +52,9 @@ const applySampleAudio = async () => {
   appState.setMetadata({ LOOPSTART: 5487730, LOOPLENGTH: 3080921 })
   // Load file with metadata preservation
   await appState.load([file], true)
+  // Wait for next tick to ensure watcher has processed
+  await nextTick()
+  isLoadingSample.value = false
 }
 
 const playPause = () => {
