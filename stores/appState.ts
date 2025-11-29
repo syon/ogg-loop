@@ -42,6 +42,15 @@ export const useAppStateStore = defineStore('appState', {
       if (!state.region) return 0
       return secondsToSamples(state.region.end - state.region.start)
     },
+    // Form values converted to seconds for waveform
+    gFormLoopStartSeconds: (state) => {
+      if (!state.formLoopStartSample) return 0
+      return samplesToSeconds(state.formLoopStartSample)
+    },
+    gFormLoopEndSeconds: (state) => {
+      if (!state.formLoopStartSample || !state.formLoopLengthSample) return 0
+      return samplesToSeconds(state.formLoopStartSample + state.formLoopLengthSample)
+    },
     gSampleStartTime: (state) => {
       if (!state.region) return '00:00.000'
       return formatTime(state.region.start)
