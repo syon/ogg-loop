@@ -53,15 +53,11 @@ const refresh = () => {
 }
 
 const playPause = () => {
-  if (waveformRef.value) {
-    waveformRef.value.playPause()
-  }
+  waveformRef.value?.playPause()
 }
 
 const handleSkip = (offset) => {
-  if (waveformRef.value) {
-    waveformRef.value.skip(offset)
-  }
+  waveformRef.value?.skip(offset)
 }
 
 const handleRepeat = (offset) => {
@@ -73,16 +69,12 @@ const handleRepeat = (offset) => {
 
 const changeZoom = (operation) => {
   appState.changeZoom(operation)
-  if (waveformRef.value) {
-    waveformRef.value.zoom(Number(appState.gZoom))
-  }
+  waveformRef.value?.zoom(Number(appState.gZoom))
 }
 
 const changeSpeed = (v) => {
   speedVal.value = v
-  if (waveformRef.value) {
-    waveformRef.value.setPlaybackRate(Number(v))
-  }
+  waveformRef.value?.setPlaybackRate(Number(v))
 }
 
 const syncFormToRegion = () => {
