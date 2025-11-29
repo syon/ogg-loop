@@ -106,7 +106,7 @@ const handleFormChange = () => {
       @submit.prevent="handleFormSubmit"
     >
       <v-text-field
-        v-model="localFormLoopStartSample"
+        v-model.number="localFormLoopStartSample"
         type="number"
         label="LOOPSTART"
         variant="outlined"
@@ -117,7 +117,7 @@ const handleFormChange = () => {
         @change="handleFormChange"
       />
       <v-text-field
-        v-model="localFormLoopLengthSample"
+        v-model.number="localFormLoopLengthSample"
         type="number"
         label="LOOPLENGTH"
         variant="outlined"

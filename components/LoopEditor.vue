@@ -49,7 +49,7 @@ const applySampleAudio = async () => {
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
   // Set metadata BEFORE loading file
-  appState.setMetadata({ LOOPSTART: 5487730, LOOPLENGTH: 3080921 })
+  appState.setMetadata({ LOOPSTART: 5489177, LOOPLENGTH: 3079036 })
   // Load file with metadata preservation
   await appState.load([file], true)
   // Wait for next tick to ensure watcher has processed
