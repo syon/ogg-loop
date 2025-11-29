@@ -20,10 +20,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits([
-  'audioprocess',
-  'seeking',
-])
+const emit = defineEmits(['audioprocess', 'seeking'])
 
 const wavesurfer = ref(null)
 const region = ref({})
@@ -110,7 +107,6 @@ const loadWaveform = (fileBuffer) => {
   })
 }
 
-
 // Public methods exposed to parent
 const playPause = () => {
   if (wavesurfer.value) {
@@ -176,3 +172,14 @@ defineExpose({
     <div id="waveform-minimap"></div>
   </div>
 </template>
+
+<style>
+region.wavesurfer-region {
+  height: 50% !important;
+  z-index: 9 !important;
+}
+region .wavesurfer-handle {
+  background-color: #f57f17 !important;
+  width: 2px !important;
+}
+</style>
