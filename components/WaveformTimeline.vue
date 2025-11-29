@@ -28,13 +28,11 @@ const emit = defineEmits([
 const wavesurfer = ref(null)
 const region = ref({})
 
-// Watch for file buffer changes and loop metadata from store
+// Watch for file buffer changes only
 watch(
-  [() => props.fileBuffer, () => appState.gLoopstart, () => appState.gLooplength],
-  ([newBuffer]) => {
+  () => props.fileBuffer,
+  (newBuffer) => {
     if (newBuffer) {
-      console.log('Loading waveform with new buffer and loop metadata')
-      console.log('Loop metadata:', { loopstart: appState.gLoopstart, looplength: appState.gLooplength })
       loadWaveform(newBuffer)
     }
   },
@@ -59,7 +57,6 @@ const loadWaveform = (fileBuffer) => {
     }
   }
 
-  console.log('appState.gLoopstart', appState.gLoopstart)
   const options = {
     loopstart: appState.gLoopstart,
     looplength: appState.gLooplength,
@@ -88,7 +85,6 @@ const loadWaveform = (fileBuffer) => {
   })
 
   wavesurfer.value.on('seeking', (sec) => {
-    console.log('seeking', sec)
     appState.setAudioprocess(sec)
     emit('seeking', sec)
   })
@@ -107,18 +103,15 @@ const setupLoopHandler = () => {
   const regionsPlugin = wavesurfer.value.regionsPlugin
 
   regionsPlugin.on('region-in', (reg) => {
-    console.log('region-in', reg)
   })
 
   regionsPlugin.on('region-out', (reg) => {
-    console.log('region-out', reg)
     if (props.loop) {
       reg.play()
     }
   })
 
   regionsPlugin.on('region-update', (region, side) => {
-    console.log('[region-update]', { region, side })
     // Update store with new region values
     appState.setRegion({
       start: region.start,

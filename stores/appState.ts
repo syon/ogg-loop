@@ -88,15 +88,21 @@ export const useAppStateStore = defineStore('appState', {
   },
 
   actions: {
-    async load(targetFiles: File[]) {
+    async load(targetFiles: File[], preserveMetadata = false) {
       if (targetFiles.length > 0) {
         this.file = targetFiles[0]
       }
+      // Store current metadata if preservation is requested
+      const savedMetadata = preserveMetadata ? this.metadata : null
       for (const f of targetFiles) {
         console.log(f)
         const dataUrl = await readAsDataURL(f)
         this.buffer = dataUrl
         this.lastLoaded = new Date().getTime()
+      }
+      // Restore metadata if it was preserved
+      if (savedMetadata) {
+        this.metadata = savedMetadata
       }
     },
 

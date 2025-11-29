@@ -23,13 +23,15 @@ onMounted(async () => {
 
 // Watchers
 watch(myfile, () => {
-  appState.clearMetadata()
+  // Only clear metadata if it's a user-selected file (not programmatic load)
+  if (myfile.value && !appState.gMetadataReady) {
+    appState.clearMetadata()
+  }
 })
 
 watch(
   () => appState.gLastLoaded,
   () => {
-    appState.clearMetadata()
     myfile.value = appState.gFile
   },
 )
@@ -39,13 +41,13 @@ const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlayin
 
 // Methods
 const applySampleAudio = async () => {
-  console.log('-------------Applying sample audio file...')
   const url = `${location.origin}/TropicalBeach.ogg`
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
-  await appState.load([file])
-  // Set metadata AFTER loading file to avoid clearMetadata() race
+  // Set metadata BEFORE loading file
   appState.setMetadata({ LOOPSTART: 5487730, LOOPLENGTH: 3080921 })
+  // Load file with metadata preservation
+  await appState.load([file], true)
 }
 
 const playPause = () => {
