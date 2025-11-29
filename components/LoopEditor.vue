@@ -22,8 +22,6 @@ const meta = ref({})
 const metaReady = ref(false)
 const loading = ref(false)
 const loop = ref(true)
-const formLoopStartSample = ref(null)
-const formLoopLengthSample = ref(null)
 
 // Computed properties
 const isPlaying = computed(
@@ -41,20 +39,6 @@ watch(
     metaReady.value = false
     refresh()
   },
-)
-
-// Sync form values with store region
-watch(
-  () => appState.gRegion,
-  (newRegion) => {
-    if (newRegion) {
-      formLoopStartSample.value = Math.round(newRegion.start * 44100)
-      formLoopLengthSample.value = Math.round(
-        (newRegion.end - newRegion.start) * 44100,
-      )
-    }
-  },
-  { deep: true },
 )
 
 // Methods
@@ -116,15 +100,15 @@ const changeSpeed = (v) => {
 
 const syncFormToRegion = () => {
   if (!appState.gRegion || !waveformRef.value) return
-  const start = Number(formLoopStartSample.value) / 44100
+  const start = Number(appState.formLoopStartSample) / 44100
   const end =
-    (Number(formLoopStartSample.value) + Number(formLoopLengthSample.value)) /
+    (Number(appState.formLoopStartSample) + Number(appState.formLoopLengthSample)) /
     44100
   waveformRef.value.updateRegion(start, end)
   // Update store as well
-  appState.updateRegionFromSamples(
-    Number(formLoopStartSample.value),
-    Number(formLoopLengthSample.value),
+  appState.updateRegionByForm(
+    Number(appState.formLoopStartSample),
+    Number(appState.formLoopLengthSample),
   )
 }
 
@@ -146,8 +130,8 @@ const handleSubmit = async () => {
   try {
     const data = await Ogg.write({
       myfile: myfile.value,
-      loopstart: formLoopStartSample.value,
-      looplength: formLoopLengthSample.value,
+      loopstart: appState.formLoopStartSample,
+      looplength: appState.formLoopLengthSample,
     })
     const filename = `${appState.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
     FileDownload(data, filename)
@@ -169,8 +153,8 @@ onMounted(async () => {
 
     <file-toolbar
       v-model:myfile="myfile"
-      v-model:form-loop-start-sample="formLoopStartSample"
-      v-model:form-loop-length-sample="formLoopLengthSample"
+      v-model:form-loop-start-sample="appState.formLoopStartSample"
+      v-model:form-loop-length-sample="appState.formLoopLengthSample"
       :meta-ready="metaReady"
       :meta="meta"
       @handle-scan-ogg="handleScanOgg"

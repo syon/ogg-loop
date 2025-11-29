@@ -14,6 +14,8 @@ export const useAppStateStore = defineStore('appState', {
     lastLoaded: null as number | null,
     region: null as Region | null,
     audioprocess: 0, // current playback position in seconds
+    formLoopStartSample: null as number | null,
+    formLoopLengthSample: null as number | null,
   }),
 
   getters: {
@@ -76,13 +78,29 @@ export const useAppStateStore = defineStore('appState', {
 
     setRegion(region: Region) {
       this.region = region
+      // Sync form values when region changes
+      this.formLoopStartSample = Math.round(region.start * SAMPLE_RATE)
+      this.formLoopLengthSample = Math.round(
+        (region.end - region.start) * SAMPLE_RATE,
+      )
     },
 
-    updateRegionFromSamples(startSample: number, lengthSample: number) {
+    updateRegionByForm(startSample: number, lengthSample: number) {
       this.region = {
         start: startSample / SAMPLE_RATE,
         end: (startSample + lengthSample) / SAMPLE_RATE,
       }
+      // Update form values
+      this.formLoopStartSample = startSample
+      this.formLoopLengthSample = lengthSample
+    },
+
+    setFormLoopStartSample(value: number) {
+      this.formLoopStartSample = value
+    },
+
+    setFormLoopLengthSample(value: number) {
+      this.formLoopLengthSample = value
     },
 
     setAudioprocess(seconds: number) {
