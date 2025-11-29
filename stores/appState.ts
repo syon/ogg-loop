@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
-
-const SAMPLE_RATE = 44100
+import { samplesToSeconds, secondsToSamples } from '@/lib/Surf'
 
 interface Region {
   start: number // seconds
@@ -33,15 +32,15 @@ export const useAppStateStore = defineStore('appState', {
     // Loop region computed values
     gSampleStart: (state) => {
       if (!state.region) return 0
-      return Math.round(state.region.start * SAMPLE_RATE)
+      return secondsToSamples(state.region.start)
     },
     gSampleEnd: (state) => {
       if (!state.region) return 0
-      return Math.round(state.region.end * SAMPLE_RATE)
+      return secondsToSamples(state.region.end)
     },
     gLooplengthSample: (state) => {
       if (!state.region) return 0
-      return Math.round((state.region.end - state.region.start) * SAMPLE_RATE)
+      return secondsToSamples(state.region.end - state.region.start)
     },
     gSampleStartTime: (state) => {
       if (!state.region) return '00:00.000'
@@ -56,7 +55,7 @@ export const useAppStateStore = defineStore('appState', {
       return formatTime(state.region.end - state.region.start)
     },
     gCurrentSample: (state) => {
-      return Math.round(state.audioprocess * SAMPLE_RATE)
+      return secondsToSamples(state.audioprocess)
     },
     gCurrentTime: (state) => {
       return formatTime(state.audioprocess)
@@ -79,14 +78,14 @@ export const useAppStateStore = defineStore('appState', {
     setRegion(region: Region) {
       this.region = region
       // Sync form values when region changes
-      this.formLoopStartSample = Math.round(region.start * SAMPLE_RATE)
-      this.formLoopLengthSample = Math.round((region.end - region.start) * SAMPLE_RATE)
+      this.formLoopStartSample = secondsToSamples(region.start)
+      this.formLoopLengthSample = secondsToSamples(region.end - region.start)
     },
 
     updateRegionByForm(startSample: number, lengthSample: number) {
       this.region = {
-        start: startSample / SAMPLE_RATE,
-        end: (startSample + lengthSample) / SAMPLE_RATE,
+        start: samplesToSeconds(startSample),
+        end: samplesToSeconds(startSample + lengthSample),
       }
       // Update form values
       this.formLoopStartSample = startSample

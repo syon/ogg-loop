@@ -9,6 +9,7 @@ import LoopInfo from '@/components/LoopInfo'
 import FileToolbar from '@/components/FileToolbar'
 import WaveformTimeline from '@/components/WaveformTimeline'
 import Ogg from '@/lib/Ogg'
+import { samplesToSeconds, calculateLoopEnd } from '@/lib/Surf'
 
 const appState = useAppStateStore()
 
@@ -98,8 +99,8 @@ const changeSpeed = (v) => {
 
 const syncFormToRegion = () => {
   if (!appState.gRegion || !waveformRef.value) return
-  const start = Number(appState.formLoopStartSample) / 44100
-  const end = (Number(appState.formLoopStartSample) + Number(appState.formLoopLengthSample)) / 44100
+  const start = samplesToSeconds(appState.formLoopStartSample)
+  const end = calculateLoopEnd(appState.formLoopStartSample, appState.formLoopLengthSample)
   waveformRef.value.updateRegion(start, end)
   // Update store as well
   appState.updateRegionByForm(
