@@ -15,6 +15,7 @@ export const useAppStateStore = defineStore('appState', {
     audioprocess: 0, // current playback position in seconds
     formLoopStartSample: null as number | null,
     formLoopLengthSample: null as number | null,
+    zoom: 0, // zoom level for waveform
   }),
 
   getters: {
@@ -69,6 +70,7 @@ export const useAppStateStore = defineStore('appState', {
     gCurrentTime: (state) => {
       return formatTime(state.audioprocess)
     },
+    gZoom: (state) => state.zoom,
   },
 
   actions: {
@@ -111,6 +113,20 @@ export const useAppStateStore = defineStore('appState', {
 
     setAudioprocess(seconds: number) {
       this.audioprocess = seconds
+    },
+
+    changeZoom(operation: 'reset' | 'minus' | 'plus') {
+      switch (operation) {
+        case 'minus':
+          this.zoom = this.zoom <= 20 ? 0 : this.zoom - 20
+          break
+        case 'plus':
+          this.zoom += 20
+          break
+        default:
+          this.zoom = 0
+          break
+      }
     },
   },
 })

@@ -14,7 +14,6 @@ const appState = useAppStateStore()
 
 // Reactive state
 const myfile = ref(null)
-const zoomVal = ref(0)
 const volumeVal = ref(50)
 const speedVal = ref(1.0)
 const waveformRef = ref(null)
@@ -72,20 +71,10 @@ const handleRepeat = (offset) => {
   }
 }
 
-const changeZoom = (sub) => {
-  switch (sub) {
-    case 'minus':
-      zoomVal.value = zoomVal.value <= 20 ? 0 : zoomVal.value - 20
-      break
-    case 'plus':
-      zoomVal.value += 20
-      break
-    default:
-      zoomVal.value = 0
-      break
-  }
+const changeZoom = (operation) => {
+  appState.changeZoom(operation)
   if (waveformRef.value) {
-    waveformRef.value.zoom(Number(zoomVal.value))
+    waveformRef.value.zoom(Number(appState.gZoom))
   }
 }
 
@@ -158,7 +147,7 @@ onMounted(async () => {
 
     <v-divider class="my-6" />
 
-    <audio-controls
+    <AudioControls
       v-model:speed-val="speedVal"
       v-model:volume-val="volumeVal"
       @change-zoom="changeZoom"
