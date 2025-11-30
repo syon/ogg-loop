@@ -1,13 +1,11 @@
 <template>
-  <v-card min-height="500" class="d-flex align-center justify-center pa-12">
+  <v-card min-height="500" class="d-flex flex-row align-center justify-center pa-12">
     <div class="text-center">
-      <div class="text-h5 text-grey-darken-2 mx-6">
-        <v-icon size="large">mdi-music-clef-treble</v-icon>
+      <div class="text-h5 text-grey-darken-1 mx-6">
+        <v-icon size="36">mdi-music-clef-treble</v-icon>
         Ogg Loop Editor
       </div>
-      <div class="text-caption text-grey text-center mt-2">
-        since 2020.07
-      </div>
+      <div class="text-caption text-grey text-center mt-2">since 2020.07</div>
     </div>
     <v-divider vertical class="mx-8 my-12" />
     <div class="flex-grow-1 mx-4">
@@ -18,10 +16,11 @@
           <div class="mt-1">
             <a
               href="http://oto-no-sono.com/"
-              style="text-decoration: none;"
+              style="text-decoration: none"
               target="_blank"
+              class="text-cyan"
             >
-              <v-icon color="grey">mdi-music</v-icon>
+              <v-icon color="grey" start>mdi-music</v-icon>
               <span class="text-grey-darken-1">Tropical Beach</span>
             </a>
           </div>
@@ -29,31 +28,29 @@
       </div>
       <div class="xx-libraries mt-8 text-grey-darken-1">
         <div class="text-overline">Frontend</div>
-        <a href="https://nuxtjs.org/" target="_blank">Nuxt.js</a>
+        <a href="https://nuxtjs.org/" target="_blank" class="text-cyan">Nuxt.js</a>
         ・
-        <a href="https://vuetifyjs.com/" target="_blank">Vuetify</a>
+        <a href="https://vuetifyjs.com/" target="_blank" class="text-cyan">Vuetify</a>
         ・
-        <a href="https://wavesurfer-js.org/" target="_blank">wavesurfer.js</a>
+        <a href="https://wavesurfer.xyz/" target="_blank" class="text-cyan">wavesurfer.js</a>
 
         <div class="text-overline mt-4">Backend</div>
-        <a href="https://vercel.com/" target="_blank">Vercel</a>
+        <a href="https://vercel.com/" target="_blank" class="text-cyan">Vercel</a>
         ・
-        <a href="https://mutagen.readthedocs.io/en/latest/" target="_blank"
-          >Mutagen</a
-        >
+        <a href="https://mutagen.readthedocs.io/en/latest/" target="_blank" class="text-cyan">
+          Mutagen
+        </a>
       </div>
     </div>
   </v-card>
 </template>
 
-<script>
-export default {
-  props: {},
-}
-</script>
-
-<style scoped>
+<style>
 .xx-libraries a {
   text-decoration: none;
+}
+
+.v-overlay__scrim {
+  background-color: #e0f7fa;
 }
 </style>
