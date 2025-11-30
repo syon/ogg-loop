@@ -7,39 +7,39 @@ const appState = useAppStateStore()
 <template>
   <div class="loopInfo d-flex">
     <v-card flat>
-      <v-card-subtitle class="pb-2">Current</v-card-subtitle>
-      <v-card-text>
-        <div class="big grey--text text--darken-3">
+      <v-card-subtitle>Current</v-card-subtitle>
+      <v-card-text class="pt-1">
+        <div class="big text-grey-darken-3">
           {{ appState.gCurrentTime }}
         </div>
-        <div class="pt-1 text-subtitle-1">{{ appState.gCurrentSample }}</div>
+        <div class="text-subtitle-1 text-grey-darken-1">{{ appState.gCurrentSample }}</div>
       </v-card-text>
     </v-card>
     <v-card flat>
-      <v-card-subtitle class="pb-2">Loop start</v-card-subtitle>
-      <v-card-text>
-        <div class="big grey--text text--darken-3">
+      <v-card-subtitle>Loop start</v-card-subtitle>
+      <v-card-text class="pt-1">
+        <div class="big text-grey-darken-3">
           {{ appState.gSampleStartTime }}
         </div>
-        <div class="pt-1 text-subtitle-1">{{ appState.gSampleStart }}</div>
+        <div class="text-subtitle-1 text-grey-darken-1">{{ appState.gSampleStart }}</div>
       </v-card-text>
     </v-card>
     <v-card flat>
-      <v-card-subtitle class="pb-2">Loop length</v-card-subtitle>
-      <v-card-text>
-        <div class="big grey--text text--darken-3">
+      <v-card-subtitle>Loop length</v-card-subtitle>
+      <v-card-text class="pt-1">
+        <div class="big text-grey-darken-3">
           {{ appState.gLooplengthTime }}
         </div>
-        <div class="pt-1 text-subtitle-1">{{ appState.gLooplengthSample }}</div>
+        <div class="text-subtitle-1 text-grey-darken-1">{{ appState.gLooplengthSample }}</div>
       </v-card-text>
     </v-card>
     <v-card flat>
-      <v-card-subtitle class="pb-2">Loop end</v-card-subtitle>
-      <v-card-text>
-        <div class="big grey--text text--darken-3">
+      <v-card-subtitle>Loop end</v-card-subtitle>
+      <v-card-text class="pt-1">
+        <div class="big text-grey-darken-3">
           {{ appState.gSampleEndTime }}
         </div>
-        <div class="pt-1 text-subtitle-1">{{ appState.gSampleEnd }}</div>
+        <div class="text-subtitle-1 text-grey-darken-1">{{ appState.gSampleEnd }}</div>
       </v-card-text>
     </v-card>
   </div>

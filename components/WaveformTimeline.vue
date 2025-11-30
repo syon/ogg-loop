@@ -174,6 +174,9 @@ defineExpose({
 </template>
 
 <style>
+#waveform showtitle div{
+  margin-left: 5px !important;
+}
 region.wavesurfer-region {
   height: 50% !important;
   z-index: 9 !important;
