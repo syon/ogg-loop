@@ -19,7 +19,7 @@ onMounted(async () => {
 })
 
 // Computed properties
-const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlaying())
+const isPlaying = computed(() => waveformRef.value?.isPlaying())
 
 // Methods
 const applySampleAudio = async () => {

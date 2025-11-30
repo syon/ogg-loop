@@ -32,15 +32,11 @@
         </template>
         <template v-else>
           <div class="screenshot-wrap">
-            <img
-              class="screenshot"
-              src="/oggloop.png"
-              alt="Ogg Loop Editor Screenshot"
-            />
+            <img class="screenshot" src="/oggloop.png" alt="Ogg Loop Editor Screenshot" />
           </div>
           <div class="text-white text-body-2 text-center pb-12">
-            Sorry, Ogg Loop Editor is currently only supported on the Google
-            Chrome browser.
+            Sorry, Ogg Loop Editor requires a modern browser with Web Audio API support (Chrome,
+            Firefox, Edge, Safari, etc.).
           </div>
         </template>
       </v-container>
@@ -61,11 +57,11 @@ export default {
   setup() {
     const aboutDialog = ref(false)
 
-    // Simple Chrome detection
+    // Modern browser detection
     const isChrome = computed(() => {
       if (process.client) {
-        const userAgent = navigator.userAgent.toLowerCase()
-        return userAgent.includes('chrome') && !userAgent.includes('edg')
+        // Check for Web Audio API support (required for WaveSurfer.js)
+        return 'AudioContext' in window || 'webkitAudioContext' in window
       }
       return true // SSR fallback
     })
@@ -84,6 +80,7 @@ body {
 }
 .v-application {
   background-image: url(/sea.jpg);
+  background-size: cover;
 }
 .v-application .v-application__wrap {
   backdrop-filter: blur(5px);
