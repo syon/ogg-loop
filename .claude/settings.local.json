@@ -17,7 +17,9 @@
       "Bash(npm run dev:*)",
       "Bash(npm run lint:*)",
       "Bash(npx nuxt typecheck:*)",
-      "Bash(npm run lint:js:*)"
+      "Bash(npm run lint:js:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
