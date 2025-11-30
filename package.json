@@ -2,42 +2,43 @@
   "name": "ogg-loop",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "engines": {
     "node": ">=22.0.0"
   },
   "scripts": {
-    "dev": "npm run dev:nuxt & npm run dev:api",
-    "dev:nuxt": "NODE_OPTIONS=--openssl-legacy-provider nuxt",
+    "dev": "npm run dev:api & sleep 2 && npm run dev:nuxt",
+    "dev:nuxt": "nuxt dev",
     "dev:api": "venv/bin/python3 api/dev_server.py",
-    "vercel": "echo 'WARNING: This command is unstable with Nuxt 2.'"
+    "build": "nuxt build",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
   },
   "dependencies": {
-    "@nuxtjs/axios": "^5.13.6",
-    "@nuxtjs/google-analytics": "^2.3.0",
-    "@nuxtjs/proxy": "^2.1.0",
-    "@nuxtjs/pwa": "^3.3.5",
-    "core-js": "^3.15.1",
+    "@mdi/font": "^7.4.47",
+    "@pinia/nuxt": "^0.5.1",
+    "@vite-pwa/nuxt": "^0.10.5",
+    "@vueuse/core": "^11.3.0",
+    "@vueuse/nuxt": "^11.3.0",
     "js-file-download": "^0.4.12",
-    "nuxt": "^2.18.1",
-    "vue-browser-detect-plugin": "^0.1.13",
-    "vue-full-screen-file-drop": "^2.0.0",
-    "vue-shortkey": "^3.1.7",
-    "vuetify": "^2.6.13",
+    "nuxt": "^3.14.1592",
+    "nuxt-gtag": "^3.0.1",
+    "pinia": "^2.2.8",
+    "vue": "^3.5.13",
+    "vue-router": "^4.4.5",
+    "vue3-shortkey": "^4.0.0",
+    "vuetify": "^3.10.11",
     "wavesurfer.js": "^4.0.1"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.14.7",
-    "@nuxtjs/eslint-config": "^6.0.1",
-    "@nuxtjs/eslint-module": "^3.0.2",
-    "@nuxtjs/vuetify": "^1.12.1",
-    "debug": "^4.1.1",
-    "eslint": "^7.29.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-plugin-nuxt": "^2.0.0",
-    "eslint-plugin-vue": "^7.12.1",
-    "prettier": "^2.3.2"
+    "debug": "^4.3.7",
+    "prettier": "^3.4.2",
+    "sass": "^1.83.0",
+    "vite-plugin-vuetify": "^2.1.2"
   },
   "prettier": {
+    "printWidth": 100,
     "semi": false,
     "singleQuote": true
   }

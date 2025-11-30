@@ -1,15 +1,9 @@
 <template>
-  <v-layout column justify-center align-center>
+  <div class="d-flex flex-column justify-center align-center">
     <loop-editor />
-  </v-layout>
+  </div>
 </template>
 
-<script>
+<script setup>
 import LoopEditor from '~/components/LoopEditor.vue'
-
-export default {
-  components: {
-    LoopEditor,
-  },
-}
 </script>

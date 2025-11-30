@@ -7,8 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Ogg Loop Editor is a web-based tool for editing loop metadata in .ogg audio files. It displays audio waveforms, allows users to visually identify loop points, and writes loop metadata (Vorbis Comments: LOOPSTART and LOOPLENGTH) directly into the file.
 
 **Technology Stack:**
-- Frontend: Nuxt.js 2.15 (SSR disabled, SPA mode)
-- UI Framework: Vuetify 2.5
+- Frontend: Nuxt.js 3.14 (SSR disabled, SPA mode)
+- UI Framework: Vuetify 3.10
 - Audio Visualization: WaveSurfer.js 4.0
 - Backend API: Python Flask (serverless functions)
 - Audio Metadata: mutagen library (Python)
@@ -20,12 +20,24 @@ Ogg Loop Editor is a web-based tool for editing loop metadata in .ogg audio file
 # Install dependencies
 npm install
 
-# Development server with hot reload at localhost:3000
-npm run dev
+# Set up Python virtual environment (required for API development)
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-# Linting
-npm run lint        # Run all linters
-npm run lint:js     # ESLint for .js and .vue files
+# Development server (runs both frontend and backend)
+npm run dev
+# This starts:
+#   - Nuxt frontend at localhost:3000 (dev:nuxt)
+#   - Flask API server at localhost:3001 (dev:api)
+# The frontend proxies /api/* requests to the backend
+
+# Run frontend or backend separately
+npm run dev:nuxt    # Frontend only
+npm run dev:api     # Backend only (uses venv/bin/python3 api/dev_server.py)
+
+# Linting (note: no linting configuration currently in project)
+# Available if configured later
 
 # Production build
 npm run build
@@ -40,21 +52,22 @@ npm run generate
 ### Frontend-Backend Communication Flow
 
 1. **File Upload → Metadata Reading:**
-   - User drops/selects .ogg file → Vuex store ([store/dropper.js](store/dropper.js))
+   - User drops/selects .ogg file → Pinia store ([stores/appState.ts](stores/appState.ts))
    - Frontend sends file to `/api/read` → Python Flask endpoint ([api/read/index.py](api/read/index.py))
    - Backend uses mutagen to extract Vorbis comments
    - Frontend receives metadata (LOOPSTART, LOOPLENGTH) and initializes waveform
 
 2. **Waveform Visualization:**
-   - [lib/Surf.js](lib/Surf.js) wraps WaveSurfer.js configuration
-   - Creates main waveform, minimap, cursor, timeline, and regions plugins
+   - [lib/Surf.js](lib/Surf.js) provides WaveSurfer.js configuration and audio utility functions
+   - Creates main waveform, minimap, timeline, and regions plugins
    - Loop region is visual representation of LOOPSTART and LOOPLENGTH
-   - Sample rate is hardcoded to 44100 Hz throughout the app
+   - Sample rate constant (44100 Hz) and conversion functions are exported from [lib/Surf.js](lib/Surf.js)
 
 3. **Loop Editing:**
    - User adjusts region visually or via form inputs
-   - [components/LoopEditor.vue](components/LoopEditor.vue) syncs region ↔ form values
-   - All calculations convert between seconds and samples (samples = seconds * 44100)
+   - [components/LoopEditor.vue](components/LoopEditor.vue) coordinates UI, delegating to store
+   - [stores/appState.ts](stores/appState.ts) manages state and performs calculations using Surf.js utilities
+   - All calculations use `samplesToSeconds()` and `secondsToSamples()` functions
 
 4. **Metadata Writing:**
    - User clicks Download → sends file + loop values to `/api/write`
@@ -69,28 +82,58 @@ npm run generate
 - `write({ myfile, loopstart, looplength })` - POST to /api/write, returns blob
 - `sendUsage(myfile)` - Sends Discord webhook notification (analytics)
 
-**[lib/Surf.js](lib/Surf.js)** - WaveSurfer.js configuration factory:
-- `create(options)` - Initializes WaveSurfer with plugins and loop region
-- Accepts `loopstart` and `looplength` in samples, converts to seconds
-- Returns configured WaveSurfer instance
+**[lib/Surf.js](lib/Surf.js)** - WaveSurfer.js configuration and audio utilities:
+- `SAMPLE_RATE` - Constant for audio sample rate (44100 Hz)
+- `samplesToSeconds(samples)` - Converts sample count to seconds
+- `secondsToSamples(seconds)` - Converts seconds to sample count (rounded)
+- `calculateLoopEnd(startSample, lengthSample)` - Calculates loop end time in seconds
+- `Surf.create(options)` - Initializes WaveSurfer with plugins and loop region
+  - Accepts `loopstart` and `looplength` in samples, converts to seconds internally
+  - Returns configured WaveSurfer instance with regions plugin
 
-**[store/dropper.js](store/dropper.js)** - Vuex module for file state:
-- Stores uploaded file and its ArrayBuffer representation
-- `load` action converts File to DataURL (note: method name is misleading - uses readAsDataURL not readAsArrayBuffer)
-- Tracks `lastLoaded` timestamp to trigger waveform refresh
+**[stores/appState.ts](stores/appState.ts)** - Pinia store for application state:
+- **State:**
+  - `file`, `buffer`, `lastLoaded` - File data and metadata
+  - `region` - Current loop region (start/end in seconds)
+  - `formLoopStartSample`, `formLoopLengthSample` - Form input values (in samples)
+  - `audioprocess` - Current playback position (in seconds)
+  - `zoom` - Waveform zoom level
+- **Getters:**
+  - `gSampleStart`, `gSampleEnd`, `gLooplengthSample` - Region values in samples
+  - `gFormLoopStartSeconds`, `gFormLoopEndSeconds` - Form values converted to seconds
+  - `gSampleStartTime`, `gSampleEndTime`, `gLooplengthTime` - Formatted time strings
+  - `gCurrentSample`, `gCurrentTime` - Current playback position
+- **Actions:**
+  - `load(files)` - Loads file and converts to DataURL
+  - `setRegion(region)` - Updates region and syncs form values
+  - `updateRegionByForm(startSample, lengthSample)` - Updates region from form inputs
+  - `changeZoom(operation)` - Adjusts zoom level (reset/minus/plus)
 
 ### Important Constants
 
-- **Sample Rate:** 44100 Hz (hardcoded throughout)
-- **Conversion:** `samples = seconds * 44100`
+- **Sample Rate:** 44100 Hz (defined as `SAMPLE_RATE` in [lib/Surf.js](lib/Surf.js))
+- **Conversion Functions:**
+  - Samples to seconds: `samplesToSeconds(samples)` → `samples / 44100`
+  - Seconds to samples: `secondsToSamples(seconds)` → `Math.round(seconds * 44100)`
 - **Metadata Keys:** LOOPSTART (sample position), LOOPLENGTH (sample count)
+- **Zoom Step:** 20 units per increment/decrement (defined in store's `changeZoom` action)
 
-### Serverless API Structure
+### Development vs Production API
 
-The `/api` directory contains Python Flask serverless functions deployed to Vercel:
-- Each subdirectory (read/, write/) contains an `index.py` that defines the handler
+**Local Development:**
+- [api/dev_server.py](api/dev_server.py) - Flask development server running on port 3001
+- Loads `/api/read` and `/api/write` endpoints from their respective index.py files
+- Nuxt proxy (nuxt.config.ts) forwards `/api/*` requests from localhost:3000 to localhost:3001
+- Must run in Python virtual environment with `venv/bin/python3`
+
+**Production (Vercel):**
+- Each `/api` subdirectory (read/, write/) deploys as a separate serverless function
+- Each contains an `index.py` that defines the handler (Flask app)
 - Functions are stateless and use temporary files for processing
-- Dependencies managed via Vercel's Python runtime (mutagen, Flask)
+- Dependencies: mutagen (OGG metadata), Flask (HTTP handling)
+- Configured in vercel.json with `@vercel/python` builder
+- **Python Version:** Vercel only supports Python 3.12 (fixed, cannot be changed)
+- Local development may use different Python version (check `.python-version`)
 
 ### UI/UX Features
 
@@ -107,9 +150,114 @@ The `/api` directory contains Python Flask serverless functions deployed to Verc
 - Form inputs for precise sample-level control
 - Auto-sync between visual region and form values
 
-### Notes
+### Development Notes
 
-- The app loads a sample audio file (TropicalBeach.ogg) on mount for demo purposes
-- Discord webhook URL is exposed in nuxt.config.js (consider moving to env vars)
-- Vuex store's `readAsArrayBuffer` function actually uses `readAsDataURL` - naming inconsistency
-- No automated tests are present in the project
+- **Sample File:** The app auto-loads TropicalBeach.ogg on mount for demo purposes
+- **Discord Analytics:** Webhook URL is exposed in nuxt.config.ts (consider moving to env vars)
+- **State Management:** Uses Pinia ([stores/appState.ts](stores/appState.ts))
+- **No Tests:** No automated tests are present in the project
+- **Node Version:** Requires Node.js >= 22.0.0 (see package.json engines)
+- **Git Branches:** Development on `nuxt3` branch, PRs merge to `master`
+- **Python Environment:**
+  - Local venv managed in `venv/` directory (gitignored)
+  - Dependencies listed in `requirements.txt`
+  - `.python-version` specifies version for local development (currently 3.12)
+  - Vercel production uses Python 3.12 (fixed by platform)
+
+## Refactoring Guidelines
+
+When refactoring this codebase, follow these principles based on the project maintainer's preferences:
+
+### 1. Centralize Business Logic in Store
+
+**Principle:** Keep calculation logic and state management in the Pinia store, not in components.
+
+**Examples:**
+- ✅ **Good:** Create store getters that provide pre-calculated values (e.g., `gFormLoopStartSeconds`, `gFormLoopEndSeconds`)
+- ❌ **Bad:** Import utility functions directly into components and perform calculations there
+- ✅ **Good:** Store actions handle complex operations (e.g., `changeZoom(operation)`)
+- ❌ **Bad:** Components contain switch statements and state manipulation logic
+
+**Rationale:** Components should be thin presentation layers that delegate to the store. This improves:
+- Reusability: Other components can use the same computed values
+- Testability: Business logic is isolated in the store
+- Maintainability: Changes to calculations happen in one place
+
+### 2. Create Utility Functions for Repeated Patterns
+
+**Principle:** Extract repeated calculations into well-named utility functions.
+
+**Examples:**
+- ✅ **Good:** Create `samplesToSeconds()` and `secondsToSamples()` functions in [lib/Surf.js](lib/Surf.js)
+- ❌ **Bad:** Write `value / 44100` and `value * 44100` throughout the codebase
+- ✅ **Good:** Use descriptive function names that reveal intent (e.g., `calculateLoopEnd(startSample, lengthSample)`)
+- ❌ **Bad:** Inline arithmetic that requires mental calculation to understand
+
+**Location Strategy:**
+- Utility functions belong in [lib/Surf.js](lib/Surf.js)
+- Store imports and uses these utilities internally
+- Components rarely need to import utilities directly (they use store getters instead)
+
+### 3. Prefer Modern JavaScript Syntax
+
+**Principle:** Use concise, modern JavaScript features to reduce code verbosity.
+
+**Examples:**
+- ✅ **Good:** Optional chaining: `waveformRef.value?.playPause()`
+- ❌ **Bad:** Nested if statements: `if (waveformRef.value) { waveformRef.value.playPause() }`
+- ✅ **Good:** Early returns for guard clauses
+- ❌ **Bad:** Deep nesting with multiple conditions
+
+**Benefits:**
+- Reduced line count (10+ lines saved in recent refactoring)
+- Improved readability through less nesting
+- Clearer intent with modern idioms
+
+### 4. Minimize Component State
+
+**Principle:** Move local component state to the store when it represents application state (not just UI state).
+
+**Examples:**
+- ✅ **Good:** Zoom level lives in store (`state.zoom`) since it affects the application state
+- ❌ **Bad:** Each component maintains its own zoom value
+- ✅ **Good:** UI-only state like `loading` or `isPlaying` can remain local to components
+- ❌ **Bad:** Moving truly local UI state to the global store
+
+**Decision Criteria:**
+- Move to store if: Multiple components need access, or it represents domain state
+- Keep local if: Only one component uses it, or it's purely presentational
+
+### 5. Code Clarity Over Cleverness
+
+**Principle:** Optimize for readability and maintainability, not brevity.
+
+**Examples:**
+- ✅ **Good:** Named functions that describe what they calculate
+- ❌ **Bad:** Inline arrow functions with complex logic
+- ✅ **Good:** Clear variable names like `loopstartSec` and `loopendSec`
+- ❌ **Bad:** Abbreviated names like `ls` and `le`
+
+**When Reducing Code:**
+- Eliminate duplication through abstraction
+- Use modern syntax for common patterns
+- Don't sacrifice clarity for fewer characters
+
+### Recent Refactoring Wins
+
+**Sample Rate Calculations (2025-01-29):**
+- Created `samplesToSeconds()`, `secondsToSamples()`, `calculateLoopEnd()` in [lib/Surf.js](lib/Surf.js)
+- Replaced all `/ 44100` and `* 44100` calculations with function calls
+- Added store getters `gFormLoopStartSeconds` and `gFormLoopEndSeconds`
+- Removed direct utility imports from [components/LoopEditor.vue](components/LoopEditor.vue)
+- Result: Intent is clear, calculations are centralized, components are simpler
+
+**Zoom Management (2025-01-29):**
+- Moved `zoomVal` state from component to store (`state.zoom`)
+- Created `changeZoom(operation)` action to encapsulate logic
+- Simplified component method from 15 lines to 3 lines
+- Result: State is centralized, logic is reusable, component is thinner
+
+**Optional Chaining (2025-01-29):**
+- Replaced `if (waveformRef.value) { ... }` blocks with `waveformRef.value?.method()`
+- Affected functions: `playPause`, `handleSkip`, `changeZoom`, `changeSpeed`
+- Result: 10 lines saved, reduced nesting, improved readability

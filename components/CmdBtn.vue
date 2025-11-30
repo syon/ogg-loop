@@ -1,12 +1,11 @@
 <template>
-  <v-tooltip bottom>
-    <template v-slot:activator="{ on, attrs }">
+  <v-tooltip location="bottom">
+    <template #activator="{ props }">
       <v-btn
         v-shortkey="shortkey"
         :value="$attrs.value"
         :icon="icon"
-        v-bind="attrs"
-        v-on="on"
+        v-bind="props"
         @shortkey="handleCommand"
         @click="handleCommand"
       >

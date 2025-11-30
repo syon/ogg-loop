@@ -2,27 +2,34 @@
   <v-data-table
     :headers="headers"
     :items="droppedFiles"
-    dense
+    density="compact"
     hide-default-footer
     class="elevation-1"
   />
 </template>
 
 <script>
-import { mapGetters } from 'vuex'
+import { useAppStateStore } from '@/stores/appState'
 
 export default {
+  setup() {
+    const appState = useAppStateStore()
+    return {
+      appState,
+    }
+  },
   data: () => ({
     headers: [
-      { text: 'name', value: 'name' },
-      { text: 'size', value: 'size' },
-      { text: 'lastModifiedDate', value: 'lastModifiedDate' },
+      { title: 'name', key: 'name' },
+      { title: 'size', key: 'size' },
+      { title: 'lastModified', key: 'lastModified' },
     ],
   }),
   computed: {
-    ...mapGetters({
-      droppedFiles: 'dropper/gFiles',
-    }),
+    droppedFiles() {
+      const fileInfo = this.appState.gFileInfo
+      return fileInfo && fileInfo.name ? [fileInfo] : []
+    },
   },
 }
 </script>

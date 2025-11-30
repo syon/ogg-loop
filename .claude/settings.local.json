@@ -11,7 +11,15 @@
       "Bash(NODE_OPTIONS=--openssl-legacy-provider vercel dev:*)",
       "Bash(lsof:*)",
       "Bash(xargs kill:*)",
-      "Bash(NODE_OPTIONS=--openssl-legacy-provider npm run dev:*)"
+      "Bash(NODE_OPTIONS=--openssl-legacy-provider npm run dev:*)",
+      "Bash(npm view:*)",
+      "Bash(curl:*)",
+      "Bash(npm run dev:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npx nuxt typecheck:*)",
+      "Bash(npm run lint:js:*)",
+      "Bash(find:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []
