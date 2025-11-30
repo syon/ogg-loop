@@ -2,8 +2,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAppStateStore } from '@/stores/appState'
 import DropZone from '@/components/DropZone'
-import CmdBtn from '@/components/CmdBtn'
 import AudioControls from '@/components/AudioControls'
+import PlaybackControls from '@/components/PlaybackControls'
 import LoopInfo from '@/components/LoopInfo'
 import FileToolbar from '@/components/FileToolbar'
 import WaveformTimeline from '@/components/WaveformTimeline'
@@ -59,27 +59,7 @@ const handleRepeat = (offset) => {
     <AudioControls @handle-skip="handleSkip" @handle-repeat="handleRepeat" />
 
     <div class="d-flex align-center justify-center my-6">
-      <div class="d-flex align-center">
-        <cmd-btn :shortkey="['space']" @do="playPause">
-          <template v-if="!isPlaying">
-            <v-icon>mdi-play</v-icon>
-          </template>
-          <template v-else>
-            <v-icon>mdi-pause</v-icon>
-          </template>
-          <template #tooltip>
-            <span>Space</span>
-          </template>
-        </cmd-btn>
-        <v-switch
-          v-model="appState.loopEnabled"
-          class="ml-6"
-          hide-details
-          label="Loop"
-          color="primary"
-          style="margin: 0"
-        />
-      </div>
+      <PlaybackControls :is-playing="isPlaying" @play-pause="playPause" />
 
       <v-divider vertical class="mx-8 my-4" />
 

@@ -16,7 +16,8 @@
       "Bash(curl:*)",
       "Bash(npm run dev:*)",
       "Bash(npm run lint:*)",
-      "Bash(npx nuxt typecheck:*)"
+      "Bash(npx nuxt typecheck:*)",
+      "Bash(npm run lint:js:*)"
     ],
     "deny": [],
     "ask": []
