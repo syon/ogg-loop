@@ -68,7 +68,7 @@ const repeat = (offset) => {
         </v-btn-toggle>
       </div>
       <div>
-        <v-icon left>mdi-fast-forward</v-icon>
+        <v-icon left class="mr-2">mdi-fast-forward</v-icon>
         <v-btn-toggle v-model="localSpeedVal" mandatory border divided>
           <cmd-btn :shortkey="['g']" :value="0.2" @do="handleSpeed(0.2)">
             0.2
@@ -138,7 +138,9 @@ const repeat = (offset) => {
         <v-slider
           v-model="localVolumeVal"
           prepend-icon="mdi-volume-high"
+          thumb-label
           hide-details
+          color="primary"
           @change="handleVolumeChange"
         />
       </div>

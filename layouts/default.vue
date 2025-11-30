@@ -1,8 +1,8 @@
 <template>
   <v-app>
     <v-app-bar extended dark flat>
-      <v-toolbar-title>
-        <v-icon>mdi-music-clef-treble</v-icon>
+      <v-toolbar-title class="text-white">
+        <v-icon size="24">mdi-music-clef-treble</v-icon>
         Ogg Loop Editor
       </v-toolbar-title>
       <v-spacer />

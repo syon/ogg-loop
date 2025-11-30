@@ -171,6 +171,7 @@ const handleSubmit = async () => {
           class="ml-6"
           hide-details
           label="Loop"
+          color="primary"
           style="margin: 0"
         />
       </div>
