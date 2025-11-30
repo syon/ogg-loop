@@ -157,10 +157,21 @@ export const useAppStateStore = defineStore('appState', {
       this.metadata = meta
       console.log('Metadata arg:', meta)
       console.log('Metadata set:', this.metadata)
+
+      // Auto-populate form values from metadata
+      if (meta.LOOPSTART !== undefined) {
+        this.formLoopStartSample = meta.LOOPSTART
+      }
+      if (meta.LOOPLENGTH !== undefined) {
+        this.formLoopLengthSample = meta.LOOPLENGTH
+      }
     },
 
     clearMetadata() {
       this.metadata = null
+      // Clear form values as well
+      this.formLoopStartSample = null
+      this.formLoopLengthSample = null
     },
 
     setVolume(value: number) {

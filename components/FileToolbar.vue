@@ -1,63 +1,77 @@
 <script setup>
 import { computed } from 'vue'
+import FileDownload from 'js-file-download'
+import { useAppStateStore } from '@/stores/appState'
+import Ogg from '@/lib/Ogg'
 
-const props = defineProps({
-  myfile: {
-    type: [File, null],
-    default: null,
-  },
-  metaReady: {
-    type: Boolean,
-    required: true,
-  },
-  meta: {
-    type: Object,
-    default: () => ({}),
-  },
-  formLoopStartSample: {
-    type: [Number, null],
-    default: null,
-  },
-  formLoopLengthSample: {
-    type: [Number, null],
-    default: null,
-  },
-})
+const appState = useAppStateStore()
 
-const emit = defineEmits([
-  'update:myfile',
-  'update:formLoopStartSample',
-  'update:formLoopLengthSample',
-  'handleScanOgg',
-  'handleSubmit',
-  'syncFormToRegion',
-])
-
+// Local computed for file input
 const localMyfile = computed({
-  get: () => props.myfile,
-  set: (value) => emit('update:myfile', value),
+  get: () => appState.gFile,
+  set: async (value) => {
+    if (value) {
+      appState.clearMetadata()
+      await appState.load([value])
+      // Auto-scan when file is selected
+      await handleScan()
+    }
+  },
 })
 
+// Form values are directly bound to appState
 const localFormLoopStartSample = computed({
-  get: () => props.formLoopStartSample,
-  set: (value) => emit('update:formLoopStartSample', value),
+  get: () => appState.formLoopStartSample,
+  set: (value) => {
+    appState.setFormLoopStartSample(value)
+  },
 })
 
 const localFormLoopLengthSample = computed({
-  get: () => props.formLoopLengthSample,
-  set: (value) => emit('update:formLoopLengthSample', value),
+  get: () => appState.formLoopLengthSample,
+  set: (value) => {
+    appState.setFormLoopLengthSample(value)
+  },
 })
 
-const handleScan = () => {
-  emit('handleScanOgg')
+const handleScan = async () => {
+  const file = appState.gFile
+  if (!file) return
+
+  appState.setLoading(true)
+  try {
+    const meta = await Ogg.scan(file)
+    appState.setMetadata(meta)
+    // Reload file with metadata
+    await appState.load([file])
+  } catch (e) {
+    console.error('[FileToolbar] Scan error:', e)
+    alert('Scan Error.')
+  }
+  appState.setLoading(false)
 }
 
-const handleFormSubmit = () => {
-  emit('handleSubmit')
-}
+const handleFormSubmit = async () => {
+  const fileToWrite = appState.gFile
+  if (!fileToWrite) {
+    alert('No file selected')
+    return
+  }
 
-const handleFormChange = () => {
-  emit('syncFormToRegion')
+  appState.setLoading(true)
+  try {
+    const data = await Ogg.write({
+      myfile: fileToWrite,
+      loopstart: appState.formLoopStartSample,
+      looplength: appState.formLoopLengthSample,
+    })
+    const filename = `${appState.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
+    FileDownload(data, filename)
+  } catch (e) {
+    console.error('[FileToolbar] Write error:', e)
+    alert('Write Error.')
+  }
+  appState.setLoading(false)
 }
 </script>
 
@@ -75,7 +89,7 @@ const handleFormChange = () => {
         style="width: 400px"
         class="mr-4"
       />
-      <template v-if="!metaReady">
+      <template v-if="!appState.gMetadataReady">
         <v-btn variant="flat" type="button" @click="handleScan">
           <v-icon start>mdi-spotlight-beam</v-icon>
           Scan
@@ -90,7 +104,7 @@ const handleFormChange = () => {
             </v-btn>
           </template>
           <v-card>
-            <v-card-text v-for="(v, k) in meta" :key="k">
+            <v-card-text v-for="(v, k) in appState.gMetadata" :key="k">
               <div class="text-caption">{{ k }}</div>
               <div class="text-body-1 text-grey-darken-4">{{ v }}</div>
             </v-card-text>
@@ -114,7 +128,6 @@ const handleFormChange = () => {
         density="compact"
         class="mr-4"
         style="width: 140px"
-        @update:modelValue="handleFormChange"
       />
       <v-text-field
         v-model.number="localFormLoopLengthSample"
@@ -125,7 +138,6 @@ const handleFormChange = () => {
         density="compact"
         class="mr-4"
         style="width: 140px"
-        @update:modelValue="handleFormChange"
       />
       <v-btn type="submit" color="primary">Download</v-btn>
     </form>

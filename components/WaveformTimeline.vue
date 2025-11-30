@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, watch } from 'vue'
 import Surf from '@/lib/Surf'
 import { useAppStateStore } from '@/stores/appState'
 
@@ -42,6 +42,20 @@ watch(
   () => appState.gSpeed,
   (newSpeed) => {
     wavesurfer.value?.setPlaybackRate(Number(newSpeed))
+  },
+)
+
+// Watch for form values changes and update region
+watch(
+  () => [appState.formLoopStartSample, appState.formLoopLengthSample],
+  ([startSample, lengthSample]) => {
+    if (startSample && lengthSample && region.value && typeof region.value.update === 'function') {
+      appState.syncFormToRegion()
+      region.value.update({
+        start: appState.gFormLoopStartSeconds,
+        end: appState.gFormLoopEndSeconds,
+      })
+    }
   },
 )
 

@@ -1,6 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
-import FileDownload from 'js-file-download'
+import { ref, computed, onMounted } from 'vue'
 import { useAppStateStore } from '@/stores/appState'
 import DropZone from '@/components/DropZone'
 import CmdBtn from '@/components/CmdBtn'
@@ -8,43 +7,22 @@ import AudioControls from '@/components/AudioControls'
 import LoopInfo from '@/components/LoopInfo'
 import FileToolbar from '@/components/FileToolbar'
 import WaveformTimeline from '@/components/WaveformTimeline'
-import Ogg from '@/lib/Ogg'
 
 const appState = useAppStateStore()
 
 // Reactive state
-const myfile = ref(null)
 const waveformRef = ref(null)
-const isLoadingSample = ref(false) // Flag to prevent auto-scan during sample load
 
 // Lifecycle
 onMounted(async () => {
   await applySampleAudio()
 })
 
-// Watchers
-watch(myfile, async (newFile, oldFile) => {
-  // When a new file is selected, clear old metadata and auto-scan
-  // Skip if loading sample file
-  if (newFile && newFile !== oldFile && !isLoadingSample.value) {
-    appState.clearMetadata()
-    await handleScanOgg()
-  }
-})
-
-watch(
-  () => appState.gLastLoaded,
-  () => {
-    myfile.value = appState.gFile
-  },
-)
-
 // Computed properties
 const isPlaying = computed(() => waveformRef.value && waveformRef.value.isPlaying())
 
 // Methods
 const applySampleAudio = async () => {
-  isLoadingSample.value = true
   const url = `${location.origin}/TropicalBeach.ogg`
   const blob = await $fetch(url, { responseType: 'blob' })
   const file = new File([blob], 'TropicalBeach.ogg', { type: 'audio/ogg' })
@@ -52,9 +30,6 @@ const applySampleAudio = async () => {
   appState.setMetadata({ LOOPSTART: 5488074, LOOPLENGTH: 3080139 })
   // Load file with metadata preservation
   await appState.load([file], true)
-  // Wait for next tick to ensure watcher has processed
-  await nextTick()
-  isLoadingSample.value = false
 }
 
 const playPause = () => {
@@ -71,66 +46,13 @@ const handleRepeat = (offset) => {
     waveformRef.value.play(sec)
   }
 }
-
-const syncFormToRegion = () => {
-  if (!appState.gRegion || !waveformRef.value) return
-  appState.syncFormToRegion()
-  waveformRef.value.updateRegion(appState.gFormLoopStartSeconds, appState.gFormLoopEndSeconds)
-}
-
-const handleScanOgg = async () => {
-  appState.setLoading(true)
-  try {
-    const meta = await Ogg.scan(myfile.value)
-    appState.setMetadata(meta)
-    // Update store with the scanned file
-    await appState.load([myfile.value])
-  } catch (e) {
-    console.error('[LoopEditor] Scan error:', e)
-    alert('Scan Error.')
-  }
-  appState.setLoading(false)
-}
-
-const handleSubmit = async () => {
-  // Use the file from appState instead of myfile.value
-  const fileToWrite = appState.gFile
-  if (!fileToWrite) {
-    alert('No file selected')
-    return
-  }
-
-  appState.setLoading(true)
-  try {
-    const data = await Ogg.write({
-      myfile: fileToWrite,
-      loopstart: appState.formLoopStartSample,
-      looplength: appState.formLoopLengthSample,
-    })
-    const filename = `${appState.gFileInfo.name.replace('.ogg', '')}_(Loop).ogg`
-    FileDownload(data, filename)
-  } catch (e) {
-    console.error('[LoopEditor] Write error:', e)
-    alert('Write Error.')
-  }
-  appState.setLoading(false)
-}
 </script>
 
 <template>
   <v-card class="LoopEditor pa-8" min-height="85vh">
     <drop-zone />
 
-    <file-toolbar
-      v-model:myfile="myfile"
-      v-model:form-loop-start-sample="appState.formLoopStartSample"
-      v-model:form-loop-length-sample="appState.formLoopLengthSample"
-      :meta-ready="appState.gMetadataReady"
-      :meta="appState.gMetadata"
-      @handle-scan-ogg="handleScanOgg"
-      @handle-submit="handleSubmit"
-      @sync-form-to-region="syncFormToRegion"
-    />
+    <FileToolbar />
 
     <v-divider class="my-6" />
 
@@ -166,7 +88,7 @@ const handleSubmit = async () => {
 
     <WaveformTimeline ref="waveformRef" />
 
-    <v-overlay :value="appState.gLoading">
+    <v-overlay :model-value="appState.gLoading" class="align-center justify-center">
       <v-progress-circular indeterminate size="64" />
     </v-overlay>
   </v-card>
