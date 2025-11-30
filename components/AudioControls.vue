@@ -1,42 +1,35 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useAppStateStore } from '@/stores/appState'
 import CmdBtn from '@/components/CmdBtn'
 
-const props = defineProps({
-  speedVal: {
-    type: Number,
-    required: true,
-  },
-  volumeVal: {
-    type: Number,
-    required: true,
-  },
-})
+const appState = useAppStateStore()
 
 const emit = defineEmits([
-  'changeZoom',
-  'changeSpeed',
   'handleSkip',
   'handleRepeat',
-  'update:speedVal',
-  'update:volumeVal',
 ])
 
-const localSpeedVal = ref(props.speedVal)
-const localVolumeVal = ref(props.volumeVal)
+const localVolumeVal = ref(appState.volume)
+
+// Sync localVolumeVal when appState.volume changes
+watch(
+  () => appState.volume,
+  (newVolume) => {
+    localVolumeVal.value = newVolume
+  },
+)
 
 const handleZoom = (type) => {
-  emit('changeZoom', type)
+  appState.changeZoom(type || 'reset')
 }
 
 const handleSpeed = (value) => {
-  localSpeedVal.value = value
-  emit('update:speedVal', value)
-  emit('changeSpeed', value)
+  appState.setSpeed(value)
 }
 
 const handleVolumeChange = () => {
-  emit('update:volumeVal', localVolumeVal.value)
+  appState.setVolume(localVolumeVal.value)
 }
 
 const skip = (offset) => {
@@ -69,7 +62,7 @@ const repeat = (offset) => {
       </div>
       <div>
         <v-icon left class="mr-2">mdi-fast-forward</v-icon>
-        <v-btn-toggle v-model="localSpeedVal" mandatory border divided>
+        <v-btn-toggle v-model="appState.speed" mandatory border divided>
           <cmd-btn :shortkey="['g']" :value="0.2" @do="handleSpeed(0.2)">
             0.2
             <template #tooltip>G</template>
@@ -141,7 +134,7 @@ const repeat = (offset) => {
           thumb-label
           hide-details
           color="primary"
-          @change="handleVolumeChange"
+          @update:modelValue="handleVolumeChange"
         />
       </div>
     </div>

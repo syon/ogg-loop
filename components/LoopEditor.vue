@@ -72,16 +72,6 @@ const handleRepeat = (offset) => {
   }
 }
 
-const changeZoom = (operation) => {
-  appState.changeZoom(operation)
-  waveformRef.value?.zoom(Number(appState.gZoom))
-}
-
-const changeSpeed = (v) => {
-  appState.setSpeed(v)
-  waveformRef.value?.setPlaybackRate(Number(v))
-}
-
 const syncFormToRegion = () => {
   if (!appState.gRegion || !waveformRef.value) return
   appState.syncFormToRegion()
@@ -144,14 +134,7 @@ const handleSubmit = async () => {
 
     <v-divider class="my-6" />
 
-    <AudioControls
-      v-model:speed-val="appState.speed"
-      v-model:volume-val="appState.volume"
-      @change-zoom="changeZoom"
-      @change-speed="changeSpeed"
-      @handle-skip="handleSkip"
-      @handle-repeat="handleRepeat"
-    />
+    <AudioControls @handle-skip="handleSkip" @handle-repeat="handleRepeat" />
 
     <div class="d-flex align-center justify-center my-6">
       <div class="d-flex align-center">
@@ -181,12 +164,7 @@ const handleSubmit = async () => {
       <LoopInfo />
     </div>
 
-    <WaveformTimeline
-      ref="waveformRef"
-      :file-buffer="appState.gFileBuffer"
-      :loop="appState.gLoopEnabled"
-      :volume-val="appState.gVolume"
-    />
+    <WaveformTimeline ref="waveformRef" />
 
     <v-overlay :value="appState.gLoading">
       <v-progress-circular indeterminate size="64" />

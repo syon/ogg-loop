@@ -114,7 +114,7 @@ const handleFormChange = () => {
         density="compact"
         class="mr-4"
         style="width: 140px"
-        @change="handleFormChange"
+        @update:modelValue="handleFormChange"
       />
       <v-text-field
         v-model.number="localFormLoopLengthSample"
@@ -125,7 +125,7 @@ const handleFormChange = () => {
         density="compact"
         class="mr-4"
         style="width: 140px"
-        @change="handleFormChange"
+        @update:modelValue="handleFormChange"
       />
       <v-btn type="submit" color="primary">Download</v-btn>
     </form>

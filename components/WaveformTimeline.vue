@@ -5,29 +5,14 @@ import { useAppStateStore } from '@/stores/appState'
 
 const appState = useAppStateStore()
 
-const props = defineProps({
-  fileBuffer: {
-    type: String,
-    default: null,
-  },
-  loop: {
-    type: Boolean,
-    default: true,
-  },
-  volumeVal: {
-    type: Number,
-    default: 50,
-  },
-})
-
 const emit = defineEmits(['audioprocess', 'seeking'])
 
 const wavesurfer = ref(null)
 const region = ref({})
 
-// Watch for file buffer changes only
+// Watch for file buffer changes
 watch(
-  () => props.fileBuffer,
+  () => appState.gFileBuffer,
   (newBuffer) => {
     if (newBuffer) {
       loadWaveform(newBuffer)
@@ -37,11 +22,26 @@ watch(
 
 // Watch for volume changes
 watch(
-  () => props.volumeVal,
+  () => appState.gVolume,
   (newVolume) => {
-    if (wavesurfer.value) {
-      wavesurfer.value.setVolume(Number(newVolume / 100))
-    }
+    console.log('Volume changed to:', newVolume)
+    wavesurfer.value?.setVolume(Number(newVolume / 100))
+  },
+)
+
+// Watch for zoom changes
+watch(
+  () => appState.gZoom,
+  (newZoom) => {
+    wavesurfer.value?.zoom(Number(newZoom))
+  },
+)
+
+// Watch for speed changes
+watch(
+  () => appState.gSpeed,
+  (newSpeed) => {
+    wavesurfer.value?.setPlaybackRate(Number(newSpeed))
   },
 )
 
@@ -80,10 +80,10 @@ const loadWaveform = (fileBuffer) => {
   }
 
   // Set initial volume
-  wavesurfer.value.setVolume(Number(props.volumeVal / 100))
+  wavesurfer.value.setVolume(Number(appState.gVolume / 100))
 
   wavesurfer.value.on('region-in', (reg) => {
-    if (props.loop) {
+    if (appState.gLoopEnabled) {
       reg.loop = true
     }
   })
@@ -131,18 +131,6 @@ const play = (sec) => {
   }
 }
 
-const zoom = (value) => {
-  if (wavesurfer.value) {
-    wavesurfer.value.zoom(Number(value))
-  }
-}
-
-const setPlaybackRate = (rate) => {
-  if (wavesurfer.value) {
-    wavesurfer.value.setPlaybackRate(Number(rate))
-  }
-}
-
 const isPlaying = () => {
   return wavesurfer.value && wavesurfer.value.isPlaying()
 }
@@ -158,8 +146,6 @@ defineExpose({
   playPause,
   skip,
   play,
-  zoom,
-  setPlaybackRate,
   isPlaying,
   updateRegion,
 })
@@ -174,7 +160,7 @@ defineExpose({
 </template>
 
 <style>
-#waveform showtitle div{
+#waveform showtitle div {
   margin-left: 5px !important;
 }
 region.wavesurfer-region {
