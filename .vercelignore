@@ -1,1 +1,49 @@
+# Dependencies
+node_modules/
+venv/
+env/
+ENV/
+
+# Build outputs (Vercel builds from source)
 .nuxt
+.output
+.nitro
+dist/
+
+# Development files
+try/
+.vscode/
+.idea/
+.claude/
+
+# Cache
+.cache
+__pycache__/
+*.py[cod]
+*$py.class
+.eslintcache
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# OS files
+.DS_Store
+*.swp
+
+# Git
+.git/
+.gitignore
+
+# Vercel
+.vercel/
+
+# Testing
+coverage/
+*.test.js
+*.spec.js
