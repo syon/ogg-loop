@@ -1,69 +1,132 @@
-# ogg-loop
+# 🎵 Ogg Loop Editor
 
-## Build Setup
+<div align="center">
+
+![ogg-loop](./public/oggloop.png)
+
+**Browser-based loop metadata editor for .ogg audio files**
+
+[![Deployed on Vercel](https://img.shields.io/badge/deployed%20on-Vercel-black?style=flat&logo=vercel)](https://oggloop.vercel.app/)
+[![Nuxt 3](https://img.shields.io/badge/Nuxt-3.14-00DC82?style=flat&logo=nuxt.js)](https://nuxt.com/)
+[![Python 3.12](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+
+[**Live Demo**](https://oggloop.vercel.app/) • [Features](#features) • [Tech Stack](#tech-stack) • [Development](#development)
+
+</div>
+
+---
+
+## Overview
+
+A web-based tool for editing loop metadata in OGG Vorbis audio files. Visualize waveforms, identify precise loop points, and write `LOOPSTART`/`LOOPLENGTH` Vorbis Comments directly into your files—all without leaving your browser.
+
+## Features
+
+- **🎨 Visual Loop Editing** — Drag-and-drop interface with WaveSurfer.js waveform visualization
+- **🎯 Sample-Accurate** — Edit loop points at 44.1kHz sample precision
+- **⚡ Real-time Preview** — Instant loop playback with adjustable speed (0.2x–2.0x)
+- **⌨️ Keyboard Shortcuts** — Vim-inspired controls for efficient workflow
+- **💾 Client-Side First** — All processing happens in your browser (serverless functions for metadata only)
+- **🎼 Minimap & Timeline** — Navigate long audio files with ease
+
+## Tech Stack
+
+<table>
+<tr>
+<td>
+
+**Frontend**
+- Nuxt 3.14 (SPA mode)
+- Vuetify 3.10
+- WaveSurfer.js 4.0
+
+</td>
+<td>
+
+**Backend**
+- Vercel Functions
+- Python Flask (serverless)
+- mutagen (metadata I/O)
+
+</td>
+</tr>
+</table>
+
+## Development
+
+### Prerequisites
 
 ```bash
-# install dependencies
-$ npm install
-
-# serve with hot reload at localhost:3000
-$ npm run dev
-
-# build for production and launch server
-$ npm run build
-$ npm run start
-
-# generate static project
-$ npm run generate
+node >= 22.0.0
+python >= 3.12
 ```
 
-For detailed explanation on how things work, check out the [documentation](https://nuxtjs.org).
+### Quick Start
 
-## Special Directories
+```bash
+# Install dependencies
+npm install
 
-You can create the following extra directories, some of which have special behaviors. Only `pages` is required; you can delete them if you don't want to use their functionality.
+# Set up Python virtual environment
+python3 -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
 
-### `assets`
+# Start dev server (frontend + backend)
+npm run dev
+```
 
-The assets directory contains your uncompiled assets such as Stylus or Sass files, images, or fonts.
+The app runs at `localhost:3000` with API server at `localhost:3001`.
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/assets).
+### Available Commands
 
-### `components`
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start both frontend and backend |
+| `npm run dev:nuxt` | Frontend only (port 3000) |
+| `npm run dev:api` | Backend only (port 3001) |
+| `npm run build` | Production build |
+| `npm run generate` | Static site generation |
 
-The components directory contains your Vue.js components. Components make up the different parts of your page and can be reused and imported into your pages, layouts and even other components.
+## Keyboard Shortcuts
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/components).
+| Key | Action | Key | Action |
+|-----|--------|-----|--------|
+| <kbd>Space</kbd> | Play/Pause | <kbd>I</kbd> <kbd>O</kbd> <kbd>P</kbd> | Zoom reset/out/in |
+| <kbd>←</kbd> <kbd>→</kbd> | Skip 5s | <kbd>Shift</kbd> + <kbd>←</kbd> <kbd>→</kbd> | Skip 10s |
+| <kbd>G</kbd> – <kbd>L</kbd> | Speed 0.2x – 2.0x | <kbd>N</kbd> <kbd>M</kbd> | Repeat from loop end -6s/-3s |
 
-### `layouts`
+## Architecture
 
-Layouts are a great help when you want to change the look and feel of your Nuxt app, whether you want to include a sidebar or have distinct layouts for mobile and desktop.
+```mermaid
+graph LR
+    A[Browser] -->|Upload .ogg| B[Pinia Store]
+    B -->|POST /api/read| C[Flask API]
+    C -->|mutagen| D[Vorbis Comments]
+    D -->|LOOPSTART/LENGTH| B
+    B -->|Initialize| E[WaveSurfer.js]
+    E -->|Visual Edit| B
+    B -->|POST /api/write| C
+    C -->|Modified .ogg| A
+```
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/layouts).
+### Key Files
 
+- [lib/Surf.js](lib/Surf.js) — WaveSurfer config, sample/time conversion utilities
+- [stores/appState.ts](stores/appState.ts) — Pinia store managing app state and business logic
+- [api/read/index.py](api/read/index.py) — Metadata extraction endpoint
+- [api/write/index.py](api/write/index.py) — Metadata writing endpoint
 
-### `pages`
+## License
 
-This directory contains your application views and routes. Nuxt will read all the `*.vue` files inside this directory and setup Vue Router automatically.
+MIT
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/get-started/routing).
+---
 
-### `plugins`
+<div align="center">
 
-The plugins directory contains JavaScript plugins that you want to run before instantiating the root Vue.js Application. This is the place to add Vue plugins and to inject functions or constants. Every time you need to use `Vue.use()`, you should create a file in `plugins/` and add its path to plugins in `nuxt.config.js`.
+**[oggloop.vercel.app](https://oggloop.vercel.app/)**
 
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/plugins).
+Made with ♪ for game audio developers
 
-### `static`
-
-This directory contains your static files. Each file inside this directory is mapped to `/`.
-
-Example: `/static/robots.txt` is mapped as `/robots.txt`.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/static).
-
-### `store`
-
-This directory contains your Vuex store files. Creating a file in this directory automatically activates Vuex.
-
-More information about the usage of this directory in [the documentation](https://nuxtjs.org/docs/2.x/directory-structure/store).
+</div>
