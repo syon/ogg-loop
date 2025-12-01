@@ -27,7 +27,7 @@
     </v-app-bar>
     <v-main>
       <v-container>
-        <template v-if="isChrome">
+        <template v-if="isAvailable">
           <slot />
         </template>
         <template v-else>
@@ -35,8 +35,8 @@
             <img class="screenshot" src="/oggloop.png" alt="Ogg Loop Editor Screenshot" />
           </div>
           <div class="text-white text-body-2 text-center pb-12">
-            Sorry, Ogg Loop Editor requires a modern browser with Web Audio API support (Chrome,
-            Firefox, Edge, Safari, etc.).
+            Sorry, Ogg Loop Editor is not optimized for mobile phones. Please use a tablet or
+            desktop with a modern browser (Chrome, Firefox, Edge, Safari, etc.).
           </div>
         </template>
       </v-container>
@@ -58,17 +58,23 @@ export default {
     const aboutDialog = ref(false)
 
     // Modern browser detection
-    const isChrome = computed(() => {
+    const isAvailable = computed(() => {
       if (process.client) {
         // Check for Web Audio API support (required for WaveSurfer.js)
-        return 'AudioContext' in window || 'webkitAudioContext' in window
+        const hasWebAudio = 'AudioContext' in window || 'webkitAudioContext' in window
+
+        // Exclude mobile phones but allow tablets
+        // Typical breakpoint: phones < 768px, tablets >= 768px
+        const isMobilePhone = window.matchMedia('(max-width: 767px) and (pointer: coarse)').matches
+
+        return hasWebAudio && !isMobilePhone
       }
-      return true // SSR fallback
+      return true
     })
 
     return {
       aboutDialog,
-      isChrome,
+      isAvailable,
     }
   },
 }
